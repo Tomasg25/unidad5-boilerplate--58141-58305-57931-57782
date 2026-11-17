@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Card from '../../shared/components/Card';
 import Button from '../../shared/components/Button';
 import TablePagination from '../../shared/components/TablePagination';
+import ToggleSwitch from '../../shared/components/ToggleSwitch';
 import DoctorForm from '../components/DoctorForm';
 import AvailabilityModal from '../components/AvailabilityModal';
 import {
@@ -9,6 +10,7 @@ import {
   createDoctor,
   updateDoctor,
   deleteDoctor,
+  toggleDoctorStatus,
 } from '../services/doctorsService';
 const PAGE_SIZE = 5;
 function DoctorsPage() {
@@ -27,6 +29,8 @@ function DoctorsPage() {
   // Delete confirmation
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  // Toggle status loading
+  const [togglingId, setTogglingId] = useState(null);
   const fetchDoctors = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -74,9 +78,26 @@ function DoctorsPage() {
       setDeleteTarget(null);
     }
   };
+  const handleToggleStatus = async (doctorId) => {
+    setTogglingId(doctorId);
+    try {
+      const updated = await toggleDoctorStatus(doctorId);
+      setDoctors((prev) =>
+        prev.map((doc) =>
+          doc.id === doctorId ? { ...doc, isActive: updated.isActive } : doc
+        )
+      );
+    } catch (err) {
+      setError(
+        err.response?.data?.message || 'Error al cambiar el estado del doctor'
+      );
+    } finally {
+      setTogglingId(null);
+    }
+  };
   return (
     <div className="flex flex-col gap-6">
-      {/* Cabecera con título, buscador y botones */}
+      {/* Cabecera */}
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-med-text-main">
@@ -87,7 +108,6 @@ function DoctorsPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          {/* Barra de búsqueda */}
           <div className="relative min-w-[240px] flex-1 sm:flex-initial">
             <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-med-text-muted">
               <svg
@@ -112,7 +132,6 @@ function DoctorsPage() {
               className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-med-border rounded-lg text-med-text-main placeholder-med-text-muted focus:outline-none focus:ring-1 focus:ring-med-primary-600"
             />
           </div>
-          {/* Botón disponibilidad */}
           <Button
             onClick={() => {
               setAvailabilityDoctorId(null);
@@ -135,7 +154,6 @@ function DoctorsPage() {
             </svg>
             <span>Gestionar Disponibilidad</span>
           </Button>
-          {/* Botón nuevo doctor */}
           <Button
             onClick={() => {
               setEditingDoctor(null);
@@ -148,13 +166,12 @@ function DoctorsPage() {
           </Button>
         </div>
       </div>
-      {/* Mensaje de error */}
       {error && (
         <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700">
           {error}
         </div>
       )}
-      {/* Tabla de doctores */}
+      {/* Tabla */}
       <Card className="p-0 overflow-hidden border-med-border">
         <div className="p-5 border-b border-med-border">
           <h2 className="text-base font-bold text-med-primary-900">
@@ -177,6 +194,7 @@ function DoctorsPage() {
                   <th className="px-6 py-3.5">Nombre del Doctor</th>
                   <th className="px-6 py-3.5">Matrícula</th>
                   <th className="px-6 py-3.5">Especialidad</th>
+                  <th className="px-6 py-3.5 text-center">Estado</th>
                   <th className="px-6 py-3.5 text-right">Acciones</th>
                 </tr>
               </thead>
@@ -186,23 +204,30 @@ function DoctorsPage() {
                     key={doc.id}
                     className="hover:bg-gray-50/70 transition-colors"
                   >
-                    {/* Nombre con avatar */}
+                    {/* Nombre */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-med-primary-100 flex items-center justify-center text-xl">
-                          <svg
-                            className="w-5 h-5 text-med-primary-700"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="1.75"
-                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                            />
-                          </svg>
+                        <div className="relative">
+                          <div className="w-10 h-10 rounded-xl bg-med-primary-100 flex items-center justify-center">
+                            <svg
+                              className="w-5 h-5 text-med-primary-700"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="1.75"
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                              />
+                            </svg>
+                          </div>
+                          <span
+                            className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${
+                              doc.isActive ? 'bg-emerald-500' : 'bg-gray-400'
+                            }`}
+                          />
                         </div>
                         <div>
                           <p className="font-semibold text-med-primary-900 leading-tight">
@@ -215,16 +240,34 @@ function DoctorsPage() {
                     <td className="px-6 py-4 text-med-text-sub">
                       {doc.licenseNumber}
                     </td>
-                    {/* Especialidad en píldora */}
+                    {/* Especialidad */}
                     <td className="px-6 py-4">
                       <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-med-primary-100 text-med-primary-700">
                         {doc.speciality?.name || 'Sin especialidad'}
                       </span>
                     </td>
-                    {/* Botones de acciones */}
+                    {/* Estado con Switch */}
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-center gap-2">
+                        <ToggleSwitch
+                          checked={doc.isActive}
+                          onChange={() => handleToggleStatus(doc.id)}
+                          disabled={togglingId === doc.id}
+                        />
+                        <span
+                          className={`text-xs font-semibold ${
+                            doc.isActive
+                              ? 'text-emerald-600'
+                              : 'text-gray-400'
+                          }`}
+                        >
+                          {doc.isActive ? 'Activo' : 'Inactivo'}
+                        </span>
+                      </div>
+                    </td>
+                    {/* Acciones */}
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2 text-med-primary-600">
-                        {/* Editar */}
                         <button
                           title="Editar profesional"
                           className="p-1.5 rounded-lg hover:bg-med-primary-50 text-med-primary-600 hover:text-med-primary-900 transition"
@@ -244,7 +287,6 @@ function DoctorsPage() {
                             />
                           </svg>
                         </button>
-                        {/* Eliminar */}
                         <button
                           title="Eliminar profesional"
                           className="p-1.5 rounded-lg hover:bg-red-50 text-med-danger-text transition"
@@ -272,7 +314,6 @@ function DoctorsPage() {
             </table>
           </div>
         )}
-        {/* Paginación real */}
         <TablePagination
           currentPage={pageIndex}
           totalPages={totalPages}

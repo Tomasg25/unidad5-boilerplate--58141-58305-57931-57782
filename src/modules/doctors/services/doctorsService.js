@@ -39,3 +39,11 @@ export const deleteDoctor = async (id) => {
   const response = await instance.delete(`api/doctors/${id}`);
   return response.data;
 };
+
+// Activa o desactiva un doctor (toggle).
+// Si estaba activo lo pone inactivo, y viceversa.
+export const toggleDoctorStatus = async (id) => {
+  const response = await instance.patch(`api/doctors/${id}/toggle-status`);
+  return response.data;
+};
+
