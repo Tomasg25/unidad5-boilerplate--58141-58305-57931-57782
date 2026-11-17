@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Card from '../../shared/components/Card';
 import Button from '../../shared/components/Button';
 import TablePagination from '../../shared/components/TablePagination';
-import DoctorFormModal from '../components/DoctorFormModal';
+import DoctorForm from '../components/DoctorForm';
 import {
   getDoctors,
   createDoctor,
@@ -261,7 +261,7 @@ function DoctorsPage() {
         />
       </Card>
       {/* Modal Crear/Editar Doctor */}
-      <DoctorFormModal
+      <DoctorForm
         isOpen={modalOpen}
         onClose={() => {
           setModalOpen(false);

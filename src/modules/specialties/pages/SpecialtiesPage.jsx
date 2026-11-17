@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Card from '../../shared/components/Card';
 import Button from '../../shared/components/Button';
 import TablePagination from '../../shared/components/TablePagination';
-import SpecialtyForm from '../components/specialityForm';
+import SpecialtyForm from '../components/SpecialityForm';
 import {
   getSpecialties,
   createSpecialty,
