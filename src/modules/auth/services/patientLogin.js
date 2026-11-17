@@ -1,4 +1,4 @@
-import { instance } from '../../shared/api/axiosInstance';
+/*import { instance } from '../../shared/api/axiosInstance';
 
 export const loginPatient = async (username, password) => {
   if (
@@ -16,4 +16,15 @@ export const loginPatient = async (username, password) => {
   });
 
   return { data: response.data.token, error: null };
+};*/
+
+import { instance } from '../../shared/api/axiosInstance';
+
+export const loginPatient = async (email, dni) => {
+  const response = await instance.post('api/auth/patient/login', {
+    email,
+    dni,
+  });
+
+  return { data: response.data, error: null };
 };
