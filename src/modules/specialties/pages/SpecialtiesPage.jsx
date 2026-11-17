@@ -2,12 +2,14 @@ import { useState, useEffect, useCallback } from 'react';
 import Card from '../../shared/components/Card';
 import Button from '../../shared/components/Button';
 import TablePagination from '../../shared/components/TablePagination';
+import ToggleSwitch from '../../shared/components/ToggleSwitch';
 import SpecialtyForm from '../components/SpecialityForm';
 import {
   getSpecialties,
   createSpecialty,
   updateSpecialty,
   deleteSpecialty,
+  toggleSpecialtyStatus,
 } from '../services/specialtiesService';
 
 const PAGE_SIZE = 5;
@@ -20,13 +22,13 @@ function SpecialtiesPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [editingSpecialty, setEditingSpecialty] = useState(null);
 
-  // Delete confirmation
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
+
+  const [togglingId, setTogglingId] = useState(null);
 
   const fetchSpecialties = useCallback(async () => {
     setLoading(true);
@@ -55,14 +57,12 @@ function SpecialtiesPage() {
     setPageIndex(1);
   };
 
-  // Create
   const handleCreate = async ({ name, description }) => {
     await createSpecialty(name, description);
     setPageIndex(1);
     await fetchSpecialties();
   };
 
-  // Edit
   const handleOpenEdit = (spec) => {
     setEditingSpecialty(spec);
     setModalOpen(true);
@@ -73,7 +73,6 @@ function SpecialtiesPage() {
     await fetchSpecialties();
   };
 
-  // Delete
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
@@ -87,6 +86,24 @@ function SpecialtiesPage() {
     } finally {
       setDeleting(false);
       setDeleteTarget(null);
+    }
+  };
+
+  const handleToggleStatus = async (specId) => {
+    setTogglingId(specId);
+    try {
+      const updated = await toggleSpecialtyStatus(specId);
+      setSpecialties((prev) =>
+        prev.map((spec) =>
+          spec.id === specId ? { ...spec, isActive: updated.isActive } : spec
+        )
+      );
+    } catch (err) {
+      setError(
+        err.response?.data?.message || 'Error al cambiar el estado de la especialidad'
+      );
+    } finally {
+      setTogglingId(null);
     }
   };
 
@@ -143,7 +160,6 @@ function SpecialtiesPage() {
         </div>
       </div>
 
-      {/* Error */}
       {error && (
         <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700">
           {error}
@@ -173,7 +189,8 @@ function SpecialtiesPage() {
                 <tr>
                   <th className="px-6 py-3.5">Nombre</th>
                   <th className="px-6 py-3.5">Descripción</th>
-                  <th className="px-6 py-3.5 text-right">Acciones</th>
+                  <th className="px-6 py-3.5 text-center">Estado</th>
+                  <th className="px-6 py-3.5 text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-med-border-subtle">
@@ -182,6 +199,7 @@ function SpecialtiesPage() {
                     key={spec.id}
                     className="hover:bg-gray-50/70 transition-colors"
                   >
+                    {/* Nombre */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-med-primary-100 text-med-primary-700 flex items-center justify-center shrink-0">
@@ -205,12 +223,35 @@ function SpecialtiesPage() {
                       </div>
                     </td>
 
+                    {/* Descripción */}
                     <td className="px-6 py-4 text-med-text-sub max-w-md">
                       {spec.description}
                     </td>
 
+                    {/* Estado — solo texto */}
+                    <td className="px-6 py-4 text-center">
+                      <span
+                        className={`inline-flex items-center gap-1.5 text-xs font-semibold ${
+                          spec.isActive ? 'text-emerald-600' : 'text-gray-400'
+                        }`}
+                      >
+                        <span
+                          className={`w-2 h-2 rounded-full ${
+                            spec.isActive ? 'bg-emerald-500' : 'bg-gray-400'
+                          }`}
+                        />
+                        {spec.isActive ? 'Activa' : 'Inactiva'}
+                      </span>
+                    </td>
+
+                    {/* Acciones — switch + editar + eliminar */}
                     <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2 text-med-text-muted">
+                      <div className="flex items-center justify-end gap-3">
+                        <ToggleSwitch
+                          checked={spec.isActive}
+                          onChange={() => handleToggleStatus(spec.id)}
+                          disabled={togglingId === spec.id}
+                        />
                         <button
                           title="Editar especialidad"
                           className="p-1.5 rounded-lg hover:bg-med-primary-50 text-med-text-muted hover:text-med-primary-900 transition"
@@ -230,7 +271,6 @@ function SpecialtiesPage() {
                             />
                           </svg>
                         </button>
-
                         <button
                           title="Eliminar especialidad"
                           className="p-1.5 rounded-lg hover:bg-red-50 text-med-text-muted hover:text-med-danger-text transition"

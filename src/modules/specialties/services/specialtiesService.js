@@ -23,3 +23,8 @@ export const deleteSpecialty = async (id) => {
     const response = await instance.delete(`api/specialties/${id}`);
     return response.data;
 };
+
+export const toggleSpecialtyStatus = async (id) => {
+  const response = await instance.patch(`api/specialties/${id}/toggle-status`);
+  return response.data;
+};
