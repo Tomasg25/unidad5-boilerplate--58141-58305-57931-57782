@@ -87,9 +87,8 @@ function PatientLoginPage() {
               <input
                 type="email"
                 placeholder="paciente@ejemplo.com"
-                className={`w-full border rounded-lg pl-10 pr-3.5 py-2.5 text-sm bg-white text-med-text-main placeholder-med-text-muted focus:outline-none focus:ring-2 focus:ring-med-primary-600 focus:border-transparent ${
-                  errors.email ? 'border-red-400 bg-red-50/20' : 'border-med-border'
-                }`}
+                className={`w-full border rounded-lg pl-10 pr-3.5 py-2.5 text-sm bg-white text-med-text-main placeholder-med-text-muted focus:outline-none focus:ring-2 focus:ring-med-primary-600 focus:border-transparent ${errors.email ? 'border-red-400 bg-red-50/20' : 'border-med-border'
+                  }`}
                 {...register('email', {
                   required: 'El correo electrónico es obligatorio',
                 })}
@@ -107,16 +106,16 @@ function PatientLoginPage() {
             </label>
             <div className="relative">
               <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-med-text-muted">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0" />
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4"><rect width="20" height="14" x="2" y="5" rx="2" /><line x1="2" x2="22" y1="10" y2="10" />
+                  <path d="M6 14h2" />
                 </svg>
               </span>
               <input
-                type="number"
+                type="text"
+                inputMode="numeric"
                 placeholder="12345678"
-                className={`w-full border rounded-lg pl-10 pr-3.5 py-2.5 text-sm bg-white text-med-text-main placeholder-med-text-muted focus:outline-none focus:ring-2 focus:ring-med-primary-600 focus:border-transparent ${
-                  errors.dni ? 'border-red-400 bg-red-50/20' : 'border-med-border'
-                }`}
+                className={`w-full border rounded-lg pl-10 pr-3.5 py-2.5 text-sm bg-white text-med-text-main placeholder-med-text-muted focus:outline-none focus:ring-2 focus:ring-med-primary-600 focus:border-transparent ${errors.dni ? 'border-red-400 bg-red-50/20' : 'border-med-border'
+                  }`}
                 {...register('dni', {
                   required: 'El DNI es obligatorio',
                 })}
