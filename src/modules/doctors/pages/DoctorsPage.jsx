@@ -3,6 +3,7 @@ import Card from '../../shared/components/Card';
 import Button from '../../shared/components/Button';
 import TablePagination from '../../shared/components/TablePagination';
 import DoctorForm from '../components/DoctorForm';
+import AvailabilityModal from '../components/AvailabilityModal';
 import {
   getDoctors,
   createDoctor,
@@ -20,10 +21,12 @@ function DoctorsPage() {
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [editingDoctor, setEditingDoctor] = useState(null);
+  // Availability modal
+  const [availabilityOpen, setAvailabilityOpen] = useState(false);
+  const [availabilityDoctorId, setAvailabilityDoctorId] = useState(null);
   // Delete confirmation
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
-  // Función que trae los doctores del backend
   const fetchDoctors = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -37,7 +40,6 @@ function DoctorsPage() {
       setLoading(false);
     }
   }, [pageIndex, searchTerm]);
-  // Se ejecuta cada vez que cambia la página o el término de búsqueda
   useEffect(() => {
     fetchDoctors();
   }, [fetchDoctors]);
@@ -46,23 +48,19 @@ function DoctorsPage() {
     setSearchTerm(value);
     setPageIndex(1);
   };
-  // Crear doctor: llama al servicio y recarga la tabla
   const handleCreate = async ({ name, licenseNumber, specialityId }) => {
     await createDoctor(name, licenseNumber, specialityId);
     setPageIndex(1);
     await fetchDoctors();
   };
-  // Abrir modal en modo edición
   const handleOpenEdit = (doc) => {
     setEditingDoctor(doc);
     setModalOpen(true);
   };
-  // Actualizar doctor: llama al servicio y recarga
   const handleUpdate = async ({ name, licenseNumber, specialityId }) => {
     await updateDoctor(editingDoctor.id, name, licenseNumber, specialityId);
     await fetchDoctors();
   };
-  // Confirmar eliminación
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
@@ -114,6 +112,29 @@ function DoctorsPage() {
               className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-med-border rounded-lg text-med-text-main placeholder-med-text-muted focus:outline-none focus:ring-1 focus:ring-med-primary-600"
             />
           </div>
+          {/* Botón disponibilidad */}
+          <Button
+            onClick={() => {
+              setAvailabilityDoctorId(null);
+              setAvailabilityOpen(true);
+            }}
+            className="flex items-center gap-2 bg-med-primary-900 hover:bg-med-primary-800 text-white"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Gestionar Disponibilidad</span>
+          </Button>
           {/* Botón nuevo doctor */}
           <Button
             onClick={() => {
@@ -316,6 +337,15 @@ function DoctorsPage() {
           </div>
         </div>
       )}
+      {/* Modal Disponibilidad Horaria */}
+      <AvailabilityModal
+        isOpen={availabilityOpen}
+        onClose={() => {
+          setAvailabilityOpen(false);
+          setAvailabilityDoctorId(null);
+        }}
+        preselectedDoctorId={availabilityDoctorId}
+      />
     </div>
   );
 }
