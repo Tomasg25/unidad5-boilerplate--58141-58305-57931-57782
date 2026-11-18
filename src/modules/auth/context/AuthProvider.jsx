@@ -46,6 +46,7 @@ function AuthProvider({ children }) {
       return { error };
     }
 
+    localStorage.setItem('patientDni', dni);
     setAuthSession(data);
     return { error: null };
   };
