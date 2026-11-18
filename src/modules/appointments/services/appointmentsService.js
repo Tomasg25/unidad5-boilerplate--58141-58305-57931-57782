@@ -23,3 +23,18 @@ export const bookAppointment = async (doctorId, slotId, dni, reason) => {
   });
   return response.data;
 };
+
+// Obtiene los turnos reservados del paciente.
+// Llama a: GET /api/appointments/patient?dni=12345678
+export const getPatientAppointments = async (dni) => {
+  const response = await instance.get('api/appointments/patient', {
+    params: { dni: Number(dni) },
+  });
+  return response.data;
+};
+// Cancela un turno del paciente.
+// Llama a: DELETE /api/appointments/{id}
+export const cancelAppointment = async (id) => {
+  const response = await instance.delete(`api/appointments/${id}`);
+  return response.data;
+};
