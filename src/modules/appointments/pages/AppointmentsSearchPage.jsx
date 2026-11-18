@@ -1,97 +1,121 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Card from '../../shared/components/Card';
 import Button from '../../shared/components/Button';
+import { getSpecialties } from '../../specialties/services/specialtiesService';
+import { getDoctors } from '../../doctors/services/doctorsService';
+import { searchAppointments } from '../services/appointmentsService';
+
+const DAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+const MONTH_NAMES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+const STATUS_MAP = {
+  Booked: { label: 'CONFIRMADO', bg: 'bg-med-active-bg', text: 'text-med-active-text', dot: 'bg-med-active-text' },
+  Cancelled: { label: 'CANCELADO', bg: 'bg-red-50', text: 'text-red-700', dot: 'bg-red-500' },
+  Attended: { label: 'ATENDIDO', bg: 'bg-slate-100', text: 'text-slate-700', dot: 'bg-slate-500' },
+  NoShow: { label: 'NO ASISTIÓ', bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500' },
+};
+
+function formatDate(dateStr) {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const d = new Date(year, month - 1, day);
+  return `${DAY_NAMES[d.getDay()]} ${day} de ${MONTH_NAMES[month - 1]}`;
+}
 
 function AppointmentsSearchPage() {
-  const [patientQuery, setPatientQuery] = useState('Johnathan Doe');
-  const [specialtyFilter, setSpecialtyFilter] = useState('Todas');
-  const [doctorFilter, setDoctorFilter] = useState('Todos');
-  const [dateFilter, setDateFilter] = useState('2023-10-24');
+  // Datos para los dropdowns
+  const [specialties, setSpecialties] = useState([]);
+  const [doctors, setDoctors] = useState([]);
 
-  const appointmentsData = [
-    {
-      id: 1,
-      date: '24 Oct, 2023',
-      time: '10:30 AM',
-      department: 'Cardiology',
-      doctor: 'Dr. Robert Smith',
-      patient: 'Johnathan Doe',
-      dni: '40.123.456',
-      status: 'CONFIRMADO',
-      statusType: 'confirmed',
-      icon: (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="1.75"
-            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-          />
-        </svg>
-      ),
-    },
-    {
-      id: 2,
-      date: '15 Oct, 2023',
-      time: '09:15 AM',
-      department: 'Neurology',
-      doctor: 'Dra. Garcia',
-      patient: 'Johnathan Doe',
-      dni: '40.123.456',
-      status: 'COMPLETADO',
-      statusType: 'completed',
-      icon: (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="1.75"
-            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-          />
-        </svg>
-      ),
-    },
-    {
-      id: 3,
-      date: '05 Oct, 2023',
-      time: '11:00 AM',
-      department: 'General Checkup',
-      doctor: 'Dr. Miller',
-      patient: 'Johnathan Doe',
-      dni: '40.123.456',
-      status: 'CANCELADO',
-      statusType: 'cancelled',
-      icon: (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="1.75"
-            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-          />
-        </svg>
-      ),
-    },
-  ];
+  // Filtros
+  const [dniFilter, setDniFilter] = useState('');
+  const [specialtyFilter, setSpecialtyFilter] = useState('');
+  const [doctorFilter, setDoctorFilter] = useState('');
+  const [dateFilter, setDateFilter] = useState('');
+
+  // Resultados
+  const [results, setResults] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [pageIndex, setPageIndex] = useState(1);
+  const [pageSize] = useState(10);
+
+  // UI
+  const [loading, setLoading] = useState(false);
+  const [loadingFilters, setLoadingFilters] = useState(true);
+  const [error, setError] = useState('');
+  const [searched, setSearched] = useState(false);
+
+  // Cargar especialidades y doctores para los dropdowns
+  useEffect(() => {
+    const loadFilters = async () => {
+      try {
+        const [specRes, docRes] = await Promise.all([
+          getSpecialties(100, 1),
+          getDoctors(100, 1),
+        ]);
+        setSpecialties(specRes.data || []);
+        setDoctors(docRes.data || []);
+      } catch {
+        setError('Error al cargar filtros.');
+      } finally {
+        setLoadingFilters(false);
+      }
+    };
+    loadFilters();
+  }, []);
+
+  // Buscar turnos
+  const handleSearch = async (page = 1) => {
+    setLoading(true);
+    setError('');
+    setPageIndex(page);
+    try {
+      const filters = {};
+      if (dniFilter.trim()) filters.dni = dniFilter.trim();
+      if (specialtyFilter) filters.specialtyId = specialtyFilter;
+      if (doctorFilter) filters.doctorId = doctorFilter;
+      if (dateFilter) filters.date = dateFilter;
+
+      const data = await searchAppointments(filters, pageSize, page);
+      setResults(data.data || []);
+      setTotal(data.total || 0);
+      setSearched(true);
+    } catch {
+      setError('Error al buscar turnos. Intente nuevamente.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Limpiar filtros
+  const handleClear = () => {
+    setDniFilter('');
+    setSpecialtyFilter('');
+    setDoctorFilter('');
+    setDateFilter('');
+    setResults([]);
+    setTotal(0);
+    setSearched(false);
+    setError('');
+  };
+
+  const totalPages = Math.ceil(total / pageSize);
+
+  // Chips de filtros activos
+  const activeFilters = [];
+  if (dniFilter.trim()) activeFilters.push(`DNI: ${dniFilter.trim()}`);
+  if (specialtyFilter) {
+    const spec = specialties.find((s) => s.id === specialtyFilter);
+    if (spec) activeFilters.push(`Especialidad: ${spec.name}`);
+  }
+  if (doctorFilter) {
+    const doc = doctors.find((d) => d.id === doctorFilter);
+    if (doc) activeFilters.push(`Doctor: ${doc.name}`);
+  }
+  if (dateFilter) activeFilters.push(`Fecha: ${dateFilter}`);
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Título de la página */}
+      {/* Título */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-med-text-main">
           Búsqueda y Filtrado de Citas
@@ -101,58 +125,28 @@ function AppointmentsSearchPage() {
         </p>
       </div>
 
-      {/* Card Superior: Criterios de Búsqueda */}
+      {/* Card Filtros */}
       <Card className="p-6">
         <div className="flex items-center justify-between pb-4 border-b border-med-border-subtle">
-          <h2 className="text-base font-bold text-med-primary-900">
-            Criterios de Búsqueda
-          </h2>
-          <div className="flex items-center gap-1.5 text-xs text-med-text-muted">
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
-            </svg>
-            <span>Última actualización: hace un momento</span>
-          </div>
+          <h2 className="text-base font-bold text-med-primary-900">Criterios de Búsqueda</h2>
         </div>
 
-        {/* Inputs de Filtros */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 mt-4 items-end">
-          {/* Nombre o DNI */}
+          {/* DNI */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-med-text-sub">
-              Nombre o DNI del Paciente
-            </label>
+            <label className="text-xs font-semibold text-med-text-sub">DNI del Paciente</label>
             <div className="relative">
               <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-med-text-muted">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </span>
               <input
                 type="text"
-                value={patientQuery}
-                onChange={(e) => setPatientQuery(e.target.value)}
-                placeholder="Nombre o DNI..."
+                inputMode="numeric"
+                value={dniFilter}
+                onChange={(e) => setDniFilter(e.target.value)}
+                placeholder="Ej: 40123456"
                 className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-med-border rounded-lg text-med-text-main placeholder-med-text-muted focus:outline-none focus:ring-1 focus:ring-med-primary-600"
               />
             </div>
@@ -160,43 +154,39 @@ function AppointmentsSearchPage() {
 
           {/* Especialidad */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-med-text-sub">
-              Especialidad
-            </label>
+            <label className="text-xs font-semibold text-med-text-sub">Especialidad</label>
             <select
               value={specialtyFilter}
               onChange={(e) => setSpecialtyFilter(e.target.value)}
+              disabled={loadingFilters}
               className="w-full px-3 py-2 text-xs bg-white border border-med-border rounded-lg text-med-text-main focus:outline-none focus:ring-1 focus:ring-med-primary-600"
             >
-              <option value="Todas">Todas las Especialidades</option>
-              <option value="Cardiology">Cardiology</option>
-              <option value="Neurology">Neurology</option>
-              <option value="General Checkup">General Checkup</option>
+              <option value="">Todas las Especialidades</option>
+              {specialties.map((s) => (
+                <option key={s.id} value={s.id}>{s.name}</option>
+              ))}
             </select>
           </div>
 
           {/* Doctor */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-med-text-sub">
-              Doctor
-            </label>
+            <label className="text-xs font-semibold text-med-text-sub">Doctor</label>
             <select
               value={doctorFilter}
               onChange={(e) => setDoctorFilter(e.target.value)}
+              disabled={loadingFilters}
               className="w-full px-3 py-2 text-xs bg-white border border-med-border rounded-lg text-med-text-main focus:outline-none focus:ring-1 focus:ring-med-primary-600"
             >
-              <option value="Todos">Todos los Doctores</option>
-              <option value="Dr. Robert Smith">Dr. Robert Smith</option>
-              <option value="Dra. Garcia">Dra. Garcia</option>
-              <option value="Dr. Miller">Dr. Miller</option>
+              <option value="">Todos los Doctores</option>
+              {doctors.map((d) => (
+                <option key={d.id} value={d.id}>{d.name}</option>
+              ))}
             </select>
           </div>
 
           {/* Fecha */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-med-text-sub">
-              Fecha
-            </label>
+            <label className="text-xs font-semibold text-med-text-sub">Fecha</label>
             <input
               type="date"
               value={dateFilter}
@@ -205,159 +195,152 @@ function AppointmentsSearchPage() {
             />
           </div>
 
-          {/* Botón Aplicar Filtros */}
+          {/* Botón Aplicar */}
           <div>
             <Button
-              onClick={() => alert('Filtros aplicados')}
-              className="w-full flex items-center justify-center gap-2 bg-med-primary-900 hover:bg-med-primary-800 text-white font-medium py-2 rounded-lg"
+              onClick={() => handleSearch(1)}
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-2 bg-med-primary-900 hover:bg-med-primary-800 text-white font-medium py-2 rounded-lg disabled:opacity-50"
             >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-                />
-              </svg>
-              <span>Aplicar Filtros</span>
+              {loading ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+              ) : (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+              )}
+              <span>{loading ? 'Buscando...' : 'Aplicar Filtros'}</span>
             </Button>
           </div>
         </div>
 
-        {/* Chips de Filtros Activos */}
-        <div className="flex flex-wrap items-center gap-2 mt-4 pt-3 border-t border-med-border-subtle">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-sky-100/70 text-sky-800">
-            Paciente: Johnathan Doe
-          </span>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-sky-100/70 text-sky-800">
-            DNI: 40.123.456
-          </span>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-            Filtro Activo: Próximos 7 Días
-          </span>
-        </div>
-      </Card>
-
-      {/* Card Inferior: Registros de Citas */}
-      <Card className="p-0 overflow-hidden border-med-border">
-        <div className="p-5 border-b border-med-border">
-          <h2 className="text-base font-bold text-med-primary-900">
-            Registros de Citas
-          </h2>
-        </div>
-
-        {/* Tabla de Citas */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-med-primary-50/70 text-[11px] uppercase tracking-wider text-med-text-sub border-b border-med-border">
-              <tr>
-                <th className="px-6 py-3.5">Fecha</th>
-                <th className="px-6 py-3.5">Departamento</th>
-                <th className="px-6 py-3.5">Paciente</th>
-                <th className="px-6 py-3.5 text-center">Estado</th>
-                <th className="px-6 py-3.5 text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-med-border-subtle">
-              {appointmentsData.map((item) => (
-                <tr
-                  key={item.id}
-                  className="hover:bg-gray-50/70 transition-colors"
-                >
-                  {/* Fecha y Hora */}
-                  <td className="px-6 py-4">
-                    <p className="font-bold text-med-primary-900 text-sm">
-                      {item.date}
-                    </p>
-                    <p className="text-xs text-med-text-muted mt-0.5">
-                      {item.time}
-                    </p>
-                  </td>
-
-                  {/* Departamento / Especialidad con Icono */}
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-med-primary-100 text-med-primary-700 flex items-center justify-center shrink-0">
-                        {item.icon}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-med-primary-900">
-                          {item.department}
-                        </p>
-                        <p className="text-xs text-med-text-muted">
-                          {item.doctor}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-
-                  {/* Paciente y DNI */}
-                  <td className="px-6 py-4">
-                    <p className="font-semibold text-med-text-main">
-                      {item.patient}
-                    </p>
-                    <p className="text-xs text-med-text-muted mt-0.5">
-                      DNI: {item.dni}
-                    </p>
-                  </td>
-
-                  {/* Estado (CONFIRMADO, COMPLETADO, CANCELADO) */}
-                  <td className="px-6 py-4 text-center">
-                    {item.statusType === 'confirmed' && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-med-active-bg text-med-active-text">
-                        <span className="w-1.5 h-1.5 rounded-full bg-med-active-text" />
-                        {item.status}
-                      </span>
-                    )}
-                    {item.statusType === 'completed' && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
-                        <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
-                        {item.status}
-                      </span>
-                    )}
-                    {item.statusType === 'cancelled' && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-med-danger-bg text-med-danger-text">
-                        <span className="w-1.5 h-1.5 rounded-full bg-med-danger-text" />
-                        {item.status}
-                      </span>
-                    )}
-                  </td>
-
-                  {/* Acciones */}
-                  <td className="px-6 py-4 text-right">
-                    <button
-                      onClick={() =>
-                        alert(`Ver detalle de cita de ${item.patient}`)
-                      }
-                      className="text-xs font-semibold text-med-primary-700 hover:text-med-primary-900 transition hover:underline"
-                    >
-                      Ver Detalle
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Paginador inferior normalizado */}
-        <div className="p-4 bg-med-primary-50/50 border-t border-med-border flex items-center justify-between text-xs text-med-text-muted">
-          <span>Mostrando 3 de 42 registros</span>
-          <div className="flex items-center gap-1">
-            <button className="px-2.5 py-1 border border-med-border rounded bg-white text-med-text-sub hover:bg-gray-50">
-              ‹
-            </button>
-            <button className="px-2.5 py-1 border border-med-border rounded bg-white text-med-text-sub hover:bg-gray-50">
-              ›
+        {/* Chips de filtros activos */}
+        {activeFilters.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 mt-4 pt-3 border-t border-med-border-subtle">
+            {activeFilters.map((filter) => (
+              <span
+                key={filter}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-sky-100/70 text-sky-800"
+              >
+                {filter}
+              </span>
+            ))}
+            <button
+              onClick={handleClear}
+              className="text-xs text-med-text-muted hover:text-red-600 transition ml-2"
+            >
+              Limpiar filtros
             </button>
           </div>
-        </div>
+        )}
       </Card>
+
+      {/* Error */}
+      {error && (
+        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600 text-center">
+          {error}
+        </div>
+      )}
+
+      {/* Card Resultados */}
+      {searched && (
+        <Card className="p-0 overflow-hidden border-med-border">
+          <div className="p-5 border-b border-med-border">
+            <h2 className="text-base font-bold text-med-primary-900">Registros de Citas</h2>
+          </div>
+
+          {results.length === 0 ? (
+            <div className="p-10 text-center text-sm text-med-text-muted">
+              No se encontraron turnos con los filtros aplicados.
+            </div>
+          ) : (
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-med-primary-50/70 text-[11px] uppercase tracking-wider text-med-text-sub border-b border-med-border">
+                    <tr>
+                      <th className="px-6 py-3.5">Fecha</th>
+                      <th className="px-6 py-3.5">Especialidad / Doctor</th>
+                      <th className="px-6 py-3.5">Paciente</th>
+                      <th className="px-6 py-3.5 text-center">Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-med-border-subtle">
+                    {results.map((item) => {
+                      const status = STATUS_MAP[item.appointmentsStatus] || STATUS_MAP.Booked;
+                      return (
+                        <tr key={item.appointmentsId} className="hover:bg-gray-50/70 transition-colors">
+                          {/* Fecha y Hora */}
+                          <td className="px-6 py-4">
+                            <p className="font-bold text-med-primary-900 text-sm">
+                              {formatDate(item.date)}
+                            </p>
+                            <p className="text-xs text-med-text-muted mt-0.5">
+                              {item.startTime} - {item.endTime} hs
+                            </p>
+                          </td>
+
+                          {/* Especialidad / Doctor */}
+                          <td className="px-6 py-4">
+                            <p className="font-semibold text-med-primary-900">
+                              {item.doctor.specialty.name}
+                            </p>
+                            <p className="text-xs text-med-text-muted">{item.doctor.name}</p>
+                          </td>
+
+                          {/* Paciente */}
+                          <td className="px-6 py-4">
+                            <p className="font-semibold text-med-text-main">
+                              {item.patient.fullName || '—'}
+                            </p>
+                            <p className="text-xs text-med-text-muted mt-0.5">
+                              DNI: {item.patient.dni}
+                            </p>
+                          </td>
+
+                          {/* Estado */}
+                          <td className="px-6 py-4 text-center">
+                            <span
+                              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${status.bg} ${status.text}`}
+                            >
+                              <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
+                              {status.label}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Paginador */}
+              <div className="p-4 bg-med-primary-50/50 border-t border-med-border flex items-center justify-between text-xs text-med-text-muted">
+                <span>
+                  Mostrando {results.length} de {total} registros — Página {pageIndex} de{' '}
+                  {totalPages || 1}
+                </span>
+                <div className="flex items-center gap-1">
+                  <button
+                    disabled={pageIndex <= 1}
+                    onClick={() => handleSearch(pageIndex - 1)}
+                    className="px-2.5 py-1 border border-med-border rounded bg-white text-med-text-sub hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    disabled={pageIndex >= totalPages}
+                    onClick={() => handleSearch(pageIndex + 1)}
+                    className="px-2.5 py-1 border border-med-border rounded bg-white text-med-text-sub hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    ›
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </Card>
+      )}
     </div>
   );
 }

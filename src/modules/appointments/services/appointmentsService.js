@@ -38,3 +38,15 @@ export const cancelAppointment = async (id) => {
   const response = await instance.delete(`api/appointments/${id}`);
   return response.data;
 };
+
+// Búsqueda avanzada de turnos (Admin).
+// Llama a: GET /api/appointments/search?specialtyId=&doctorId=&dni=&date=&pageSize=&pageIndex=
+export const searchAppointments = async (filters = {}, pageSize = 10, pageIndex = 1) => {
+  const params = { pageSize, pageIndex };
+  if (filters.specialtyId) params.specialtyId = filters.specialtyId;
+  if (filters.doctorId) params.doctorId = filters.doctorId;
+  if (filters.dni) params.dni = Number(filters.dni);
+  if (filters.date) params.date = filters.date;
+  const response = await instance.get('api/appointments/search', { params });
+  return response.data;
+};
