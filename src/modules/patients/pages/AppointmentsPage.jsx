@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../../shared/components/Card';
 import Button from '../../shared/components/Button';
+import PageHeader from '../../shared/components/PageHeader';
+import ConfirmModal from '../../shared/components/ConfirmModal';
 import {
   getPatientAppointments,
   cancelAppointment,
@@ -50,8 +52,7 @@ function AppointmentsPage() {
       setAppointments((prev) => prev.filter((a) => a.id !== cancelTarget.id));
       setCancelTarget(null);
     } catch (err) {
-      const msg =
-        err?.response?.data?.message || 'Error al cancelar el turno. Intente nuevamente.';
+      const msg = err?.response?.data?.message || 'Error al cancelar el turno. Intente nuevamente.';
       setError(msg);
       setCancelTarget(null);
     } finally {
@@ -67,33 +68,21 @@ function AppointmentsPage() {
   }
   return (
     <div className="flex flex-col gap-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-med-text-main">
-            Mis Turnos Médicos
-          </h1>
-          <p className="text-sm text-med-text-sub mt-1">
-            Consulta y gestiona las citas médicas programadas.
-          </p>
-        </div>
+      <PageHeader
+        title="Mis Turnos Médicos"
+        subtitle="Consulta y gestiona las citas médicas programadas."
+      >
         <Button onClick={() => navigate('/')}>+ Solicitar Nuevo Turno</Button>
-      </div>
-      {/* Error */}
+      </PageHeader>
       {error && (
         <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600 text-center">
           {error}
         </div>
       )}
-      {/* Lista de turnos o estado vacío */}
       {appointments.length === 0 ? (
         <Card className="p-10 text-center">
-          <p className="text-med-text-muted text-sm">
-            No tenés turnos reservados en este momento.
-          </p>
-          <Button className="mt-4" onClick={() => navigate('/')}>
-            Reservar un turno
-          </Button>
+          <p className="text-med-text-muted text-sm">No tenés turnos reservados en este momento.</p>
+          <Button className="mt-4" onClick={() => navigate('/')}>Reservar un turno</Button>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -112,24 +101,16 @@ function AppointmentsPage() {
                 <h3 className="text-lg font-bold text-med-primary-900">{appt.doctor}</h3>
                 <p className="text-sm text-med-text-sub mt-2">
                   Fecha:{' '}
-                  <strong className="text-med-text-main font-semibold">
-                    {formatDate(appt.date)}
-                  </strong>{' '}
+                  <strong className="text-med-text-main font-semibold">{formatDate(appt.date)}</strong>{' '}
                   a las{' '}
-                  <strong className="text-med-text-main font-semibold">
-                    {formatTime(appt.startTime)} hs
-                  </strong>
+                  <strong className="text-med-text-main font-semibold">{formatTime(appt.startTime)} hs</strong>
                 </p>
                 {appt.reason && (
                   <p className="text-xs text-med-text-muted mt-1">Motivo: {appt.reason}</p>
                 )}
               </div>
               <div className="flex gap-2 pt-3 border-t border-med-border">
-                <Button
-                  variant="outline"
-                  className="w-full text-xs"
-                  onClick={() => setCancelTarget(appt)}
-                >
+                <Button variant="outline" className="w-full text-xs" onClick={() => setCancelTarget(appt)}>
                   Cancelar Turno
                 </Button>
               </div>
@@ -137,42 +118,22 @@ function AppointmentsPage() {
           ))}
         </div>
       )}
-      {/* Modal de confirmación de cancelación */}
-      {cancelTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 text-center">
-            <div className="w-14 h-14 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
-              !
-            </div>
-            <h3 className="text-xl font-bold text-med-primary-900">Cancelar Turno</h3>
-            <p className="text-sm text-med-text-sub mt-2 leading-relaxed">
-              ¿Estás seguro de que querés cancelar el turno con{' '}
-              <strong className="text-med-text-main">{cancelTarget.doctor}</strong> del{' '}
-              <strong className="text-med-text-main">
-                {formatDate(cancelTarget.date)} a las {formatTime(cancelTarget.startTime)} hs
-              </strong>
-              ?
-            </p>
-            <div className="mt-6 flex flex-col sm:flex-row gap-3">
-              <Button
-                className="w-full text-xs py-2.5 bg-red-600 hover:bg-red-700"
-                disabled={cancelling}
-                onClick={handleCancel}
-              >
-                {cancelling ? 'Cancelando...' : 'Sí, cancelar turno'}
-              </Button>
-              <Button
-                variant="secondary"
-                className="w-full text-xs py-2.5"
-                disabled={cancelling}
-                onClick={() => setCancelTarget(null)}
-              >
-                No, mantener
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        isOpen={!!cancelTarget}
+        onClose={() => setCancelTarget(null)}
+        onConfirm={handleCancel}
+        title="Cancelar Turno"
+        confirmText="Sí, cancelar turno"
+        cancelText="No, mantener"
+        loading={cancelling}
+        variant="danger"
+      >
+        ¿Estás seguro de que querés cancelar el turno con{' '}
+        <strong className="text-med-text-main">{cancelTarget?.doctor}</strong> del{' '}
+        <strong className="text-med-text-main">
+          {cancelTarget && formatDate(cancelTarget.date)} a las {cancelTarget && formatTime(cancelTarget.startTime)} hs
+        </strong>?
+      </ConfirmModal>
     </div>
   );
 }

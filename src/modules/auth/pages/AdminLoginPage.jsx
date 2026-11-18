@@ -103,11 +103,10 @@ function AdminLoginPage() {
                 <input
                   type="email"
                   placeholder="admin@medportal.com"
-                  className={`w-full border rounded-lg pl-10 pr-3.5 py-2.5 text-sm bg-white text-med-text-main placeholder-med-text-muted focus:outline-none focus:ring-2 focus:ring-med-primary-600 focus:border-transparent ${
-                    errors.username
-                      ? 'border-red-400 bg-red-50/20'
-                      : 'border-med-border'
-                  }`}
+                  className={`w-full border rounded-lg pl-10 pr-3.5 py-2.5 text-sm bg-white text-med-text-main placeholder-med-text-muted focus:outline-none focus:ring-2 focus:ring-med-primary-600 focus:border-transparent ${errors.username
+                    ? 'border-red-400 bg-red-50/20'
+                    : 'border-med-border'
+                    }`}
                   {...register('username', {
                     required: 'El correo electrónico es obligatorio',
                   })}
@@ -144,11 +143,10 @@ function AdminLoginPage() {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
-                  className={`w-full border rounded-lg pl-10 pr-10 py-2.5 text-sm bg-white text-med-text-main placeholder-med-text-muted focus:outline-none focus:ring-2 focus:ring-med-primary-600 focus:border-transparent ${
-                    errors.password
-                      ? 'border-red-400 bg-red-50/20'
-                      : 'border-med-border'
-                  }`}
+                  className={`w-full border rounded-lg pl-10 pr-10 py-2.5 text-sm bg-white text-med-text-main placeholder-med-text-muted focus:outline-none focus:ring-2 focus:ring-med-primary-600 focus:border-transparent ${errors.password
+                    ? 'border-red-400 bg-red-50/20'
+                    : 'border-med-border'
+                    }`}
                   {...register('password', {
                     required: 'La contraseña es obligatoria',
                   })}
@@ -220,8 +218,8 @@ function AdminLoginPage() {
             <div className="bg-med-primary-50 border border-med-primary-200/60 rounded-lg p-2.5 text-center text-xs text-med-primary-900">
               <span className="font-semibold">Credenciales de prueba:</span>
               <br />
-              Email: <code>admin@medportal.com</code> | Clave:{' '}
-              <code>admin123</code>
+              Email: <code>admin@test.com</code> | Clave:{' '}
+              <code>Admin123.</code>
             </div>
 
             {/* Error Message */}
