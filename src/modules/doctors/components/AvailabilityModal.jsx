@@ -17,6 +17,7 @@ const DAYS_OPTIONS = [
 ];
 const EMPTY_ROW = { day: '', startTime: '', endTime: '' };
 function AvailabilityModal({ isOpen, onClose, preselectedDoctorId }) {
+
   const [doctors, setDoctors] = useState([]);
   const [selectedDoctorId, setSelectedDoctorId] = useState('');
   const [rows, setRows] = useState([{ ...EMPTY_ROW }]);
@@ -25,6 +26,7 @@ function AvailabilityModal({ isOpen, onClose, preselectedDoctorId }) {
   const [loadingData, setLoadingData] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+
   // Al abrir: cargar lista de doctores para el dropdown
   useEffect(() => {
     if (!isOpen) return;
@@ -47,6 +49,7 @@ function AvailabilityModal({ isOpen, onClose, preselectedDoctorId }) {
       setHasExisting(false);
     }
   }, [isOpen, preselectedDoctorId]);
+
   // Cuando cambia el doctor seleccionado: cargar su disponibilidad actual
   useEffect(() => {
     if (!selectedDoctorId || !isOpen) return;
@@ -79,6 +82,7 @@ function AvailabilityModal({ isOpen, onClose, preselectedDoctorId }) {
     };
     fetchAvailability();
   }, [selectedDoctorId, isOpen]);
+  
   // Agregar una fila nueva al formulario
   const addRow = () => {
     setRows([...rows, { ...EMPTY_ROW }]);

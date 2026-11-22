@@ -14,7 +14,9 @@ import {
   deleteDoctor,
   toggleDoctorStatus,
 } from '../services/doctorsService';
+
 const PAGE_SIZE = 5;
+
 function DoctorsPage() {
   const [doctors, setDoctors] = useState([]);
   const [total, setTotal] = useState(0);
@@ -29,6 +31,7 @@ function DoctorsPage() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [togglingId, setTogglingId] = useState(null);
+  
   const fetchDoctors = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -42,27 +45,33 @@ function DoctorsPage() {
       setLoading(false);
     }
   }, [pageIndex, searchTerm]);
+
   useEffect(() => {
     fetchDoctors();
   }, [fetchDoctors]);
+
   const totalPages = Math.ceil(total / PAGE_SIZE);
   const handleSearch = (value) => {
     setSearchTerm(value);
     setPageIndex(1);
   };
+
   const handleCreate = async ({ name, licenseNumber, specialityId }) => {
     await createDoctor(name, licenseNumber, specialityId);
     setPageIndex(1);
     await fetchDoctors();
   };
+
   const handleOpenEdit = (doc) => {
     setEditingDoctor(doc);
     setModalOpen(true);
   };
+
   const handleUpdate = async ({ name, licenseNumber, specialityId }) => {
     await updateDoctor(editingDoctor.id, name, licenseNumber, specialityId);
     await fetchDoctors();
   };
+
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
@@ -76,6 +85,7 @@ function DoctorsPage() {
       setDeleteTarget(null);
     }
   };
+
   const handleToggleStatus = async (doctorId) => {
     setTogglingId(doctorId);
     try {
@@ -91,6 +101,7 @@ function DoctorsPage() {
       setTogglingId(null);
     }
   };
+
   const columns = [
     {
       header: 'Nombre del Doctor',
