@@ -1,99 +1,29 @@
-import { useState, useEffect } from 'react';
 import Card from '../../shared/components/Card';
 import Button from '../../shared/components/Button';
 import DataTable from '../../shared/components/DataTable';
 import StatusBadge from '../../shared/components/StatusBadge';
 import PageHeader from '../../shared/components/PageHeader';
-import { getSpecialties } from '../../specialties/services/specialtiesService';
-import { getDoctors } from '../../doctors/services/doctorsService';
-import { searchAppointments } from '../services/appointmentsService';
-const DAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-const MONTH_NAMES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+import useAppointmentSearch from '../hook/useAppointmentSearch';
+
 const STATUS_VARIANT = {
   Booked: { label: 'CONFIRMADO', variant: 'booked' },
   Cancelled: { label: 'CANCELADO', variant: 'cancelled' },
   Attended: { label: 'ATENDIDO', variant: 'attended' },
   NoShow: { label: 'NO ASISTIÓ', variant: 'noshow' },
 };
-function formatDate(dateStr) {
-  const [year, month, day] = dateStr.split('-').map(Number);
-  const d = new Date(year, month - 1, day);
-  return `${DAY_NAMES[d.getDay()]} ${day} de ${MONTH_NAMES[month - 1]}`;
-}
+
 function AppointmentsSearchPage() {
-  const [specialties, setSpecialties] = useState([]);
-  const [doctors, setDoctors] = useState([]);
-  const [dniFilter, setDniFilter] = useState('');
-  const [specialtyFilter, setSpecialtyFilter] = useState('');
-  const [doctorFilter, setDoctorFilter] = useState('');
-  const [dateFilter, setDateFilter] = useState('');
-  const [results, setResults] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [pageIndex, setPageIndex] = useState(1);
-  const [pageSize] = useState(10);
-  const [loading, setLoading] = useState(false);
-  const [loadingFilters, setLoadingFilters] = useState(true);
-  const [error, setError] = useState('');
-  const [searched, setSearched] = useState(false);
-  useEffect(() => {
-    const loadFilters = async () => {
-      try {
-        const [specRes, docRes] = await Promise.all([
-          getSpecialties(100, 1),
-          getDoctors(100, 1),
-        ]);
-        setSpecialties(specRes.data || []);
-        setDoctors(docRes.data || []);
-      } catch {
-        setError('Error al cargar filtros.');
-      } finally {
-        setLoadingFilters(false);
-      }
-    };
-    loadFilters();
-  }, []);
-  const handleSearch = async (page = 1) => {
-    setLoading(true);
-    setError('');
-    setPageIndex(page);
-    try {
-      const filters = {};
-      if (dniFilter.trim()) filters.dni = dniFilter.trim();
-      if (specialtyFilter) filters.specialtyId = specialtyFilter;
-      if (doctorFilter) filters.doctorId = doctorFilter;
-      if (dateFilter) filters.date = dateFilter;
-      const data = await searchAppointments(filters, pageSize, page);
-      setResults(data.data || []);
-      setTotal(data.total || 0);
-      setSearched(true);
-    } catch {
-      setError('Error al buscar turnos. Intente nuevamente.');
-    } finally {
-      setLoading(false);
-    }
-  };
-  const handleClear = () => {
-    setDniFilter('');
-    setSpecialtyFilter('');
-    setDoctorFilter('');
-    setDateFilter('');
-    setResults([]);
-    setTotal(0);
-    setSearched(false);
-    setError('');
-  };
-  const totalPages = Math.ceil(total / pageSize);
-  const activeFilters = [];
-  if (dniFilter.trim()) activeFilters.push(`DNI: ${dniFilter.trim()}`);
-  if (specialtyFilter) {
-    const spec = specialties.find((s) => s.id === specialtyFilter);
-    if (spec) activeFilters.push(`Especialidad: ${spec.name}`);
-  }
-  if (doctorFilter) {
-    const doc = doctors.find((d) => d.id === doctorFilter);
-    if (doc) activeFilters.push(`Doctor: ${doc.name}`);
-  }
-  if (dateFilter) activeFilters.push(`Fecha: ${dateFilter}`);
+  const {
+    specialties, doctors,
+    dniFilter, setDniFilter,
+    specialtyFilter, setSpecialtyFilter,
+    doctorFilter, setDoctorFilter,
+    dateFilter, setDateFilter,
+    results, total, totalPages, pageIndex,
+    loading, loadingFilters, error, searched, activeFilters,
+    handleSearch, handleClear, formatDate, PAGE_SIZE,
+  } = useAppointmentSearch();
+
   const columns = [
     {
       header: 'Fecha',
@@ -131,13 +61,13 @@ function AppointmentsSearchPage() {
       },
     },
   ];
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Búsqueda y Filtrado de Citas"
         subtitle="Gestione y supervise el flujo de pacientes del departamento."
       />
-      {/* Card Filtros */}
       <Card className="p-6">
         <div className="flex items-center justify-between pb-4 border-b border-med-border-subtle">
           <h2 className="text-base font-bold text-med-primary-900">Criterios de Búsqueda</h2>
@@ -249,7 +179,7 @@ function AppointmentsSearchPage() {
           currentPage={pageIndex}
           totalPages={totalPages}
           totalItems={total}
-          pageSize={pageSize}
+          pageSize={PAGE_SIZE}
           onPageChange={(page) => handleSearch(page)}
         />
       )}
