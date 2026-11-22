@@ -1,204 +1,24 @@
-import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../../shared/components/Card';
 import Button from '../../shared/components/Button';
-import { getSpecialties } from '../../specialties/services/specialtiesService';
-import { getDoctors } from '../../doctors/services/doctorsService';
-import { getFreeSlots, bookAppointment } from '../../appointments/services/appointmentsService';
-
-const DAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-const SHORT_DAYS = ['DOM', 'LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB'];
-const MONTH_NAMES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-const SHORT_MONTHS = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
-
-function toDateStr(d) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
-
-function parseDate(dateStr) {
-  const [year, month, day] = dateStr.split('-').map(Number);
-  return new Date(year, month - 1, day);
-}
-
-function formatFullDate(dateStr) {
-  const d = parseDate(dateStr);
-  return `${DAY_NAMES[d.getDay()]} ${d.getDate()} de ${MONTH_NAMES[d.getMonth()]} de ${d.getFullYear()}`;
-}
-
-function formatTime(timeStr) {
-  return timeStr.substring(0, 5);
-}
-
-function getMonday(date) {
-  const d = new Date(date);
-  const day = d.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  d.setDate(d.getDate() + diff);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
-function getWeekDays(monday) {
-  const days = [];
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    days.push(d);
-  }
-  return days;
-}
+import useBooking from '../hook/useBooking';
 
 function PatientHome() {
   const navigate = useNavigate();
-
-  const [specialties, setSpecialties] = useState([]);
-  const [allDoctors, setAllDoctors] = useState([]);
-  const [slots, setSlots] = useState([]);
-
-  const [selectedSpecialtyId, setSelectedSpecialtyId] = useState('');
-  const [selectedDoctorId, setSelectedDoctorId] = useState('');
-  const [selectedDate, setSelectedDate] = useState('');
-  const [selectedSlot, setSelectedSlot] = useState(null);
-  const [reason, setReason] = useState('');
-
-  const [weekOffset, setWeekOffset] = useState(0);
-
-  const [loading, setLoading] = useState(true);
-  const [loadingSlots, setLoadingSlots] = useState(false);
-  const [booking, setBooking] = useState(false);
-  const [slotsSearched, setSlotsSearched] = useState(false);
-  const [confirmedModal, setConfirmedModal] = useState(false);
-  const [error, setError] = useState('');
-  const [bookedInfo, setBookedInfo] = useState(null);
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [specRes, docRes] = await Promise.all([
-          getSpecialties(100, 1),
-          getDoctors(100, 1),
-        ]);
-        setSpecialties((specRes.data || []).filter((s) => s.isActive));
-        setAllDoctors((docRes.data || []).filter((d) => d.isActive));
-      } catch {
-        setError('Error al cargar datos. Intente nuevamente.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadData();
-  }, []);
-
-  const filteredDoctors = selectedSpecialtyId
-    ? allDoctors.filter((d) => d.speciality?.specialityId === selectedSpecialtyId)
-    : allDoctors;
-
-  const currentDoctor = allDoctors.find((d) => d.id === selectedDoctorId);
-
-  // Agrupar slots por fecha
-  const slotsByDate = slots.reduce((acc, slot) => {
-    if (!acc[slot.date]) acc[slot.date] = [];
-    acc[slot.date].push(slot);
-    return acc;
-  }, {});
-
-  // Semana actual basada en el offset
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const currentMonday = getMonday(today);
-  const displayMonday = new Date(currentMonday);
-  displayMonday.setDate(displayMonday.getDate() + weekOffset * 7);
-  const weekDays = getWeekDays(displayMonday);
-
-  const weekLabel = (() => {
-    const first = weekDays[0];
-    const last = weekDays[6];
-    if (first.getMonth() === last.getMonth()) {
-      return `${first.getDate()} - ${last.getDate()} de ${MONTH_NAMES[first.getMonth()]}`;
-    }
-    return `${first.getDate()} ${SHORT_MONTHS[first.getMonth()]} - ${last.getDate()} ${SHORT_MONTHS[last.getMonth()]}`;
-  })();
-
-  // Slots del día seleccionado (mobile)
-  const currentDateSlots = selectedDate ? slotsByDate[selectedDate] || [] : [];
-
-  // Handlers
-  const handleSpecialtyChange = (specId) => {
-    setSelectedSpecialtyId(specId);
-    setSelectedDoctorId('');
-    setSlots([]);
-    setSelectedSlot(null);
-    setSelectedDate('');
-    setSlotsSearched(false);
-    setWeekOffset(0);
-    setError('');
-  };
-
-  const handleDoctorChange = (docId) => {
-    setSelectedDoctorId(docId);
-    setSlots([]);
-    setSelectedSlot(null);
-    setSelectedDate('');
-    setSlotsSearched(false);
-    setWeekOffset(0);
-    setError('');
-  };
-
-  const handleSearchSlots = async () => {
-    if (!selectedDoctorId) return;
-    setLoadingSlots(true);
-    setError('');
-    setSelectedSlot(null);
-    setSelectedDate('');
-    setWeekOffset(0);
-    try {
-      const data = await getFreeSlots(selectedDoctorId);
-      setSlots(data || []);
-      setSlotsSearched(true);
-    } catch {
-      setError('Error al buscar disponibilidad. Intente nuevamente.');
-    } finally {
-      setLoadingSlots(false);
-    }
-  };
-
-  const handleConfirmAppointment = async () => {
-    if (!selectedSlot) return;
-    if (reason.trim().length < 5) {
-      setError('El motivo de consulta debe tener al menos 5 caracteres.');
-      return;
-    }
-    const dni = localStorage.getItem('patientDni');
-    if (!dni) {
-      setError('No se encontró su DNI. Por favor, vuelva a iniciar sesión.');
-      return;
-    }
-    setBooking(true);
-    setError('');
-    try {
-      await bookAppointment(selectedDoctorId, selectedSlot.id, Number(dni), reason.trim());
-      setBookedInfo({
-        doctor: currentDoctor?.name,
-        specialty: currentDoctor?.speciality?.name || '',
-        date: formatFullDate(selectedSlot.date),
-        time: formatTime(selectedSlot.startTime),
-        dni,
-      });
-      setConfirmedModal(true);
-      setSlots((prev) => prev.filter((s) => s.id !== selectedSlot.id));
-      setSelectedSlot(null);
-      setReason('');
-    } catch (err) {
-      const msg =
-        err?.response?.data?.message || 'Error al reservar el turno. Intente nuevamente.';
-      setError(msg);
-    } finally {
-      setBooking(false);
-    }
-  };
+  const {
+    specialties, filteredDoctors, currentDoctor, slots, slotsByDate,
+    selectedSpecialtyId, selectedDoctorId,
+    selectedDate, setSelectedDate,
+    selectedSlot, setSelectedSlot,
+    reason, setReason,
+    weekOffset, setWeekOffset,
+    weekDays, weekLabel, today, currentDateSlots,
+    loading, loadingSlots, booking, slotsSearched, error,
+    bookedInfo,
+    handleSpecialtyChange, handleDoctorChange,
+    handleSearchSlots, handleConfirmAppointment, clearBookedInfo,
+    toDateStr, formatFullDate, formatTime, SHORT_DAYS,
+  } = useBooking();
 
   if (loading) {
     return (
@@ -226,7 +46,6 @@ function PatientHome() {
             Seleccione la especialidad y el profesional para continuar.
           </p>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
           <div className="md:col-span-5 flex flex-col gap-1.5">
             <label className="text-xs font-semibold text-med-text-sub">Seleccionar Especialidad</label>
@@ -244,7 +63,6 @@ function PatientHome() {
               <span className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-med-text-muted">▼</span>
             </div>
           </div>
-
           <div className="md:col-span-4 flex flex-col gap-1.5">
             <label className="text-xs font-semibold text-med-text-sub">Seleccionar Doctor</label>
             <div className="relative">
@@ -261,7 +79,6 @@ function PatientHome() {
               <span className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-med-text-muted">▼</span>
             </div>
           </div>
-
           <div className="md:col-span-3">
             <Button
               type="button"
@@ -350,7 +167,7 @@ function PatientHome() {
                 </div>
               </div>
 
-              {/* DESKTOP: Grid de 7 columnas (Lun-Dom) */}
+              {/* DESKTOP: Grid de 7 columnas */}
               <div className="hidden sm:grid grid-cols-7 gap-2 pt-5">
                 {weekDays.map((day) => {
                   const dateStr = toDateStr(day);
@@ -360,7 +177,6 @@ function PatientHome() {
 
                   return (
                     <div key={dateStr} className="flex flex-col items-center gap-2">
-                      {/* Cabecera del día */}
                       <div className={`text-center w-full py-2 rounded-lg ${isToday ? 'bg-med-primary-900 text-white' : ''}`}>
                         <span className={`text-[10px] font-bold uppercase ${isToday ? 'text-white/80' : 'text-med-text-sub'}`}>
                           {SHORT_DAYS[day.getDay()]}
@@ -369,8 +185,6 @@ function PatientHome() {
                           {day.getDate()}
                         </p>
                       </div>
-
-                      {/* Slots o estado vacío */}
                       <div className="w-full flex flex-col gap-1.5 min-h-[60px]">
                         {isPast ? (
                           <div className="flex-1 flex items-center justify-center">
@@ -408,7 +222,7 @@ function PatientHome() {
                 })}
               </div>
 
-              {/* MOBILE: Selector de días horizontal + grilla de horarios */}
+              {/* MOBILE: Selector de días + grilla de horarios */}
               <div className="block sm:hidden pt-4 space-y-4">
                 <div>
                   <span className="text-xs font-bold text-med-text-main mb-2 block">
@@ -421,7 +235,6 @@ function PatientHome() {
                       const isPast = day < today;
                       const isActive = selectedDate === dateStr;
                       const hasSlots = daySlots.length > 0;
-                      const isToday = toDateStr(day) === toDateStr(today);
 
                       return (
                         <button
@@ -518,7 +331,6 @@ function PatientHome() {
               {currentDoctor?.name} - {currentDoctor?.speciality?.name} - Duración: 30 min
             </p>
           </div>
-
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-semibold text-med-text-sub">Motivo de consulta</label>
             <textarea
@@ -529,7 +341,6 @@ function PatientHome() {
               className="w-full px-3.5 py-2.5 text-sm bg-white border border-med-border rounded-lg text-med-text-main placeholder-med-text-muted focus:outline-none focus:ring-2 focus:ring-med-primary-600 resize-none"
             />
           </div>
-
           <div className="flex justify-end">
             <Button
               type="button"
@@ -556,7 +367,7 @@ function PatientHome() {
       )}
 
       {/* Modal de Confirmación Exitosa */}
-      {confirmedModal && bookedInfo && (
+      {bookedInfo && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 text-center">
             <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
@@ -582,7 +393,7 @@ function PatientHome() {
               <Button
                 variant="secondary"
                 className="w-full text-xs py-2.5"
-                onClick={() => { setConfirmedModal(false); setBookedInfo(null); }}
+                onClick={clearBookedInfo}
               >
                 Reservar Otro
               </Button>

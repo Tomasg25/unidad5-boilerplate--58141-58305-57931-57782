@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import Button from '../../shared/components/Button';
 import DataTable from '../../shared/components/DataTable';
 import ToggleSwitch from '../../shared/components/ToggleSwitch';
@@ -6,66 +6,30 @@ import StatusBadge from '../../shared/components/StatusBadge';
 import PageHeader from '../../shared/components/PageHeader';
 import ConfirmModal from '../../shared/components/ConfirmModal';
 import SpecialtyForm from '../components/SpecialityForm';
-import {
-  getSpecialties,
-  createSpecialty,
-  updateSpecialty,
-  deleteSpecialty,
-  toggleSpecialtyStatus,
-} from '../services/specialtiesService';
-const PAGE_SIZE = 5;
+import useSpecialties from '../hook/useSpecialties';
+
 function SpecialtiesPage() {
-  const [specialties, setSpecialties] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [pageIndex, setPageIndex] = useState(1);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const {
+    specialties, totalPages, pageIndex, setPageIndex, searchTerm,
+    loading, error, setError, togglingId, handleSearch,
+    handleCreate, handleUpdate, handleDelete, handleToggleStatus, PAGE_SIZE,
+  } = useSpecialties();
+
   const [modalOpen, setModalOpen] = useState(false);
   const [editingSpecialty, setEditingSpecialty] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
-  const [togglingId, setTogglingId] = useState(null);
-  const fetchSpecialties = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await getSpecialties(PAGE_SIZE, pageIndex, searchTerm);
-      setSpecialties(result.data);
-      setTotal(result.total);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Error al cargar las especialidades');
-    } finally {
-      setLoading(false);
-    }
-  }, [pageIndex, searchTerm]);
-  useEffect(() => {
-    fetchSpecialties();
-  }, [fetchSpecialties]);
-  const totalPages = Math.ceil(total / PAGE_SIZE);
-  const handleSearch = (value) => {
-    setSearchTerm(value);
-    setPageIndex(1);
-  };
-  const handleCreate = async ({ name, description }) => {
-    await createSpecialty(name, description);
-    setPageIndex(1);
-    await fetchSpecialties();
-  };
+
   const handleOpenEdit = (spec) => {
     setEditingSpecialty(spec);
     setModalOpen(true);
   };
-  const handleUpdate = async ({ name, description }) => {
-    await updateSpecialty(editingSpecialty.id, name, description);
-    await fetchSpecialties();
-  };
+
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      await deleteSpecialty(deleteTarget.id);
-      await fetchSpecialties();
+      await handleDelete(deleteTarget.id);
     } catch (err) {
       setError(err.response?.data?.message || 'Error al eliminar la especialidad');
     } finally {
@@ -73,21 +37,7 @@ function SpecialtiesPage() {
       setDeleteTarget(null);
     }
   };
-  const handleToggleStatus = async (specId) => {
-    setTogglingId(specId);
-    try {
-      const updated = await toggleSpecialtyStatus(specId);
-      setSpecialties((prev) =>
-        prev.map((spec) =>
-          spec.id === specId ? { ...spec, isActive: updated.isActive } : spec
-        )
-      );
-    } catch (err) {
-      setError(err.response?.data?.message || 'Error al cambiar el estado');
-    } finally {
-      setTogglingId(null);
-    }
-  };
+
   const columns = [
     {
       header: 'Nombre',
@@ -150,6 +100,7 @@ function SpecialtiesPage() {
       ),
     },
   ];
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
@@ -193,14 +144,14 @@ function SpecialtiesPage() {
         rowKey={(spec) => spec.id}
         currentPage={pageIndex}
         totalPages={totalPages}
-        totalItems={total}
+        totalItems={specialties.length}
         pageSize={PAGE_SIZE}
         onPageChange={(page) => setPageIndex(page)}
       />
       <SpecialtyForm
         isOpen={modalOpen}
         onClose={() => { setModalOpen(false); setEditingSpecialty(null); }}
-        onSubmit={editingSpecialty ? handleUpdate : handleCreate}
+        onSubmit={editingSpecialty ? (data) => handleUpdate(editingSpecialty.id, data) : handleCreate}
         specialty={editingSpecialty}
       />
       <ConfirmModal

@@ -1,59 +1,20 @@
-import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../../shared/components/Card';
 import Button from '../../shared/components/Button';
 import DataTable from '../../shared/components/DataTable';
 import StatusBadge from '../../shared/components/StatusBadge';
 import PageHeader from '../../shared/components/PageHeader';
-import { getDoctors } from '../../doctors/services/doctorsService';
-import { getSpecialties } from '../../specialties/services/specialtiesService';
-import { searchAppointments } from '../../appointments/services/appointmentsService';
+import useDashboard from '../hook/useDashboard';
 
 function OverviewPage() {
   const navigate = useNavigate();
-  const [doctors, setDoctors] = useState([]);
-  const [totalDoctors, setTotalDoctors] = useState(0);
-  const [doctorPage, setDoctorPage] = useState(1);
-  const [activeDoctorsCount, setActiveDoctorsCount] = useState(0);
-  const [activeSpecialtiesCount, setActiveSpecialtiesCount] = useState(0);
-  const [todayAppointmentsCount, setTodayAppointmentsCount] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const PAGE_SIZE = 5;
+  const {
+    pagedDoctors, totalDoctors, totalDoctorPages,
+    doctorPage, setDoctorPage,
+    activeDoctorsCount, activeSpecialtiesCount, todayAppointmentsCount,
+    loading, error, PAGE_SIZE,
+  } = useDashboard();
 
-  useEffect(() => {
-    const loadDashboard = async () => {
-      try {
-        const today = new Date().toISOString().split('T')[0];
-        const [docRes, specRes, apptRes] = await Promise.all([
-          getDoctors(100, 1),
-          getSpecialties(100, 1),
-          searchAppointments({ date: today }, 1, 1),
-        ]);
-
-        const allDoctors = docRes.data || [];
-        const allSpecialties = specRes.data || [];
-        setDoctors(allDoctors);
-        setTotalDoctors(allDoctors.length);
-        setActiveDoctorsCount(allDoctors.filter((d) => d.isActive).length);
-        setActiveSpecialtiesCount(allSpecialties.filter((s) => s.isActive).length);
-        setTodayAppointmentsCount(apptRes.total || 0);
-
-      } catch {
-        setError('Error al cargar el dashboard.');
-
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadDashboard();
-  }, []);
-  
-  const totalDoctorPages = Math.ceil(totalDoctors / PAGE_SIZE);
-  const pagedDoctors = doctors.slice(
-    (doctorPage - 1) * PAGE_SIZE,
-    doctorPage * PAGE_SIZE
-  );
   const columns = [
     {
       header: 'Nombre del Doctor',
@@ -97,6 +58,7 @@ function OverviewPage() {
       ),
     },
   ];
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-20">
@@ -104,6 +66,7 @@ function OverviewPage() {
       </div>
     );
   }
+
   return (
     <div className="flex flex-col gap-8">
       <PageHeader
@@ -124,7 +87,6 @@ function OverviewPage() {
           {error}
         </div>
       )}
-      {/* Tarjetas de Métricas */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <Card className="flex flex-col justify-between p-6">
           <div className="w-11 h-11 rounded-xl bg-med-primary-50 text-med-primary-900 flex items-center justify-center">
