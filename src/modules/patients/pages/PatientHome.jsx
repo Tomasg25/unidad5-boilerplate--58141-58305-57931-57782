@@ -6,18 +6,40 @@ import useBooking from '../hook/useBooking';
 function PatientHome() {
   const navigate = useNavigate();
   const {
-    specialties, filteredDoctors, currentDoctor, slots, slotsByDate,
-    selectedSpecialtyId, selectedDoctorId,
-    selectedDate, setSelectedDate,
-    selectedSlot, setSelectedSlot,
-    reason, setReason,
-    weekOffset, setWeekOffset,
-    weekDays, weekLabel, today, currentDateSlots,
-    loading, loadingSlots, booking, slotsSearched, error,
+    specialties,
+    filteredDoctors,
+    currentDoctor,
+    slots,
+    slotsByDate,
+    selectedSpecialtyId,
+    selectedDoctorId,
+    selectedDate,
+    setSelectedDate,
+    selectedSlot,
+    setSelectedSlot,
+    reason,
+    setReason,
+    weekOffset,
+    setWeekOffset,
+    weekDays,
+    weekLabel,
+    today,
+    currentDateSlots,
+    loading,
+    loadingSlots,
+    booking,
+    slotsSearched,
+    error,
     bookedInfo,
-    handleSpecialtyChange, handleDoctorChange,
-    handleSearchSlots, handleConfirmAppointment, clearBookedInfo,
-    toDateStr, formatFullDate, formatTime, SHORT_DAYS,
+    handleSpecialtyChange,
+    handleDoctorChange,
+    handleSearchSlots,
+    handleConfirmAppointment,
+    clearBookedInfo,
+    toDateStr,
+    formatFullDate,
+    formatTime,
+    SHORT_DAYS,
   } = useBooking();
 
   if (loading) {
@@ -48,7 +70,9 @@ function PatientHome() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
           <div className="md:col-span-5 flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-med-text-sub">Seleccionar Especialidad</label>
+            <label className="text-xs font-semibold text-med-text-sub">
+              Seleccionar Especialidad
+            </label>
             <div className="relative">
               <select
                 value={selectedSpecialtyId}
@@ -57,14 +81,20 @@ function PatientHome() {
               >
                 <option value="">— Todas las especialidades —</option>
                 {specialties.map((spec) => (
-                  <option key={spec.id} value={spec.id}>{spec.name}</option>
+                  <option key={spec.id} value={spec.id}>
+                    {spec.name}
+                  </option>
                 ))}
               </select>
-              <span className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-med-text-muted">▼</span>
+              <span className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-med-text-muted">
+                ▼
+              </span>
             </div>
           </div>
           <div className="md:col-span-4 flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-med-text-sub">Seleccionar Doctor</label>
+            <label className="text-xs font-semibold text-med-text-sub">
+              Seleccionar Doctor
+            </label>
             <div className="relative">
               <select
                 value={selectedDoctorId}
@@ -73,10 +103,14 @@ function PatientHome() {
               >
                 <option value="">— Seleccione un doctor —</option>
                 {filteredDoctors.map((doc) => (
-                  <option key={doc.id} value={doc.id}>{doc.name}</option>
+                  <option key={doc.id} value={doc.id}>
+                    {doc.name}
+                  </option>
                 ))}
               </select>
-              <span className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-med-text-muted">▼</span>
+              <span className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-med-text-muted">
+                ▼
+              </span>
             </div>
           </div>
           <div className="md:col-span-3">
@@ -89,11 +123,23 @@ function PatientHome() {
               {loadingSlots ? (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
               ) : (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
                 </svg>
               )}
-              <span>{loadingSlots ? 'Buscando...' : 'Buscar Disponibilidad'}</span>
+              <span>
+                {loadingSlots ? 'Buscando...' : 'Buscar Disponibilidad'}
+              </span>
             </Button>
           </div>
         </div>
@@ -104,16 +150,32 @@ function PatientHome() {
         <Card className="p-5 sm:p-6 flex items-center gap-4 border-med-border">
           <div className="relative shrink-0">
             <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-med-primary-100 flex items-center justify-center text-3xl border border-med-primary-200">
-              <svg className="w-8 h-8 text-med-primary-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.75" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              <svg
+                className="w-8 h-8 text-med-primary-700"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="1.75"
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
               </svg>
             </div>
             <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white" />
           </div>
           <div className="overflow-hidden">
-            <h2 className="text-base sm:text-lg font-bold text-med-primary-900">{currentDoctor.name}</h2>
-            <p className="text-xs sm:text-sm font-semibold text-med-primary-700 mt-0.5">{currentDoctor.speciality?.name}</p>
-            <p className="text-xs text-med-text-muted mt-0.5">Matrícula: {currentDoctor.licenseNumber}</p>
+            <h2 className="text-base sm:text-lg font-bold text-med-primary-900">
+              {currentDoctor.name}
+            </h2>
+            <p className="text-xs sm:text-sm font-semibold text-med-primary-700 mt-0.5">
+              {currentDoctor.speciality?.name}
+            </p>
+            <p className="text-xs text-med-text-muted mt-0.5">
+              Matrícula: {currentDoctor.licenseNumber}
+            </p>
           </div>
         </Card>
       )}
@@ -135,7 +197,10 @@ function PatientHome() {
                   <button
                     type="button"
                     disabled={weekOffset === 0}
-                    onClick={() => { setWeekOffset((w) => w - 1); setSelectedSlot(null); }}
+                    onClick={() => {
+                      setWeekOffset((w) => w - 1);
+                      setSelectedSlot(null);
+                    }}
                     className="p-1.5 rounded-md border border-med-border hover:bg-gray-50 text-med-text-sub transition disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     ‹
@@ -145,7 +210,10 @@ function PatientHome() {
                   </span>
                   <button
                     type="button"
-                    onClick={() => { setWeekOffset((w) => w + 1); setSelectedSlot(null); }}
+                    onClick={() => {
+                      setWeekOffset((w) => w + 1);
+                      setSelectedSlot(null);
+                    }}
                     className="p-1.5 rounded-md border border-med-border hover:bg-gray-50 text-med-text-sub transition"
                   >
                     ›
@@ -176,12 +244,21 @@ function PatientHome() {
                   const isToday = toDateStr(day) === toDateStr(today);
 
                   return (
-                    <div key={dateStr} className="flex flex-col items-center gap-2">
-                      <div className={`text-center w-full py-2 rounded-lg ${isToday ? 'bg-med-primary-900 text-white' : ''}`}>
-                        <span className={`text-[10px] font-bold uppercase ${isToday ? 'text-white/80' : 'text-med-text-sub'}`}>
+                    <div
+                      key={dateStr}
+                      className="flex flex-col items-center gap-2"
+                    >
+                      <div
+                        className={`text-center w-full py-2 rounded-lg ${isToday ? 'bg-med-primary-900 text-white' : ''}`}
+                      >
+                        <span
+                          className={`text-[10px] font-bold uppercase ${isToday ? 'text-white/80' : 'text-med-text-sub'}`}
+                        >
                           {SHORT_DAYS[day.getDay()]}
                         </span>
-                        <p className={`text-lg font-bold leading-tight ${isToday ? 'text-white' : isPast ? 'text-gray-300' : 'text-med-primary-900'}`}>
+                        <p
+                          className={`text-lg font-bold leading-tight ${isToday ? 'text-white' : isPast ? 'text-gray-300' : 'text-med-primary-900'}`}
+                        >
                           {day.getDate()}
                         </p>
                       </div>
@@ -192,11 +269,14 @@ function PatientHome() {
                           </div>
                         ) : daySlots.length === 0 ? (
                           <div className="flex-1 flex items-center justify-center rounded-lg border border-dashed border-med-border bg-gray-50/50 py-3">
-                            <span className="text-[10px] text-med-text-muted">Sin turnos</span>
+                            <span className="text-[10px] text-med-text-muted">
+                              Sin turnos
+                            </span>
                           </div>
                         ) : (
                           daySlots.map((slot) => {
                             const isSelected = selectedSlot?.id === slot.id;
+
                             return (
                               <button
                                 key={slot.id}
@@ -253,14 +333,20 @@ function PatientHome() {
                                 : 'bg-white border-med-border text-med-text-main hover:bg-gray-50'
                           }`}
                         >
-                          <span className={`block text-[9px] font-bold uppercase ${isActive ? 'text-white/80' : 'text-med-text-sub'}`}>
+                          <span
+                            className={`block text-[9px] font-bold uppercase ${isActive ? 'text-white/80' : 'text-med-text-sub'}`}
+                          >
                             {SHORT_DAYS[day.getDay()]}
                           </span>
-                          <span className={`block text-sm font-extrabold my-0.5 ${isPast && !isActive ? 'text-gray-300' : ''}`}>
+                          <span
+                            className={`block text-sm font-extrabold my-0.5 ${isPast && !isActive ? 'text-gray-300' : ''}`}
+                          >
                             {day.getDate()}
                           </span>
                           {hasSlots && !isPast && (
-                            <span className={`block w-1.5 h-1.5 rounded-full mx-auto ${isActive ? 'bg-white' : 'bg-emerald-400'}`} />
+                            <span
+                              className={`block w-1.5 h-1.5 rounded-full mx-auto ${isActive ? 'bg-white' : 'bg-emerald-400'}`}
+                            />
                           )}
                         </button>
                       );
@@ -277,6 +363,7 @@ function PatientHome() {
                       <div className="grid grid-cols-3 gap-2">
                         {currentDateSlots.map((slot) => {
                           const isSelected = selectedSlot?.id === slot.id;
+
                           return (
                             <button
                               key={slot.id}
@@ -295,7 +382,9 @@ function PatientHome() {
                       </div>
                     ) : (
                       <div className="p-6 bg-gray-50 border border-med-border rounded-xl text-center">
-                        <p className="text-xs text-med-text-muted">No hay turnos disponibles para esta fecha.</p>
+                        <p className="text-xs text-med-text-muted">
+                          No hay turnos disponibles para esta fecha.
+                        </p>
                       </div>
                     )}
                   </div>
@@ -303,7 +392,9 @@ function PatientHome() {
 
                 {!selectedDate && (
                   <div className="p-6 bg-gray-50 border border-med-border rounded-xl text-center">
-                    <p className="text-xs text-med-text-muted">Seleccioná un día para ver los horarios disponibles.</p>
+                    <p className="text-xs text-med-text-muted">
+                      Seleccioná un día para ver los horarios disponibles.
+                    </p>
                   </div>
                 )}
               </div>
@@ -320,19 +411,33 @@ function PatientHome() {
               Resumen de Selección
             </span>
             <p className="text-base sm:text-lg font-bold text-med-primary-900 mt-0.5 flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
               </svg>
               <span>
-                {formatFullDate(selectedSlot.date)}, {formatTime(selectedSlot.startTime)} HS
+                {formatFullDate(selectedSlot.date)},{' '}
+                {formatTime(selectedSlot.startTime)} HS
               </span>
             </p>
             <p className="text-xs text-med-text-sub mt-0.5">
-              {currentDoctor?.name} - {currentDoctor?.speciality?.name} - Duración: 30 min
+              {currentDoctor?.name} - {currentDoctor?.speciality?.name} -
+              Duración: 30 min
             </p>
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-med-text-sub">Motivo de consulta</label>
+            <label className="text-xs font-semibold text-med-text-sub">
+              Motivo de consulta
+            </label>
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
@@ -356,8 +461,18 @@ function PatientHome() {
               ) : (
                 <>
                   <span>Confirmar Turno</span>
-                  <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    className="w-5 h-5 text-emerald-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
                 </>
               )}
@@ -371,23 +486,47 @@ function PatientHome() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 text-center">
             <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
-              <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              <svg
+                className="w-7 h-7"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-med-primary-900">¡Turno Confirmado con Éxito!</h3>
+            <h3 className="text-xl font-bold text-med-primary-900">
+              ¡Turno Confirmado con Éxito!
+            </h3>
             <p className="text-xs text-med-text-sub mt-2 leading-relaxed">
               Tu turno con{' '}
-              <strong className="text-med-text-main">{bookedInfo.doctor}</strong> ha sido
-              reservado para el{' '}
-              <strong className="text-med-text-main">{bookedInfo.date} a las {bookedInfo.time} hs</strong>.
+              <strong className="text-med-text-main">
+                {bookedInfo.doctor}
+              </strong>{' '}
+              ha sido reservado para el{' '}
+              <strong className="text-med-text-main">
+                {bookedInfo.date} a las {bookedInfo.time} hs
+              </strong>
+              .
             </p>
             <div className="mt-5 p-3.5 bg-med-primary-50 border border-med-primary-200/60 rounded-xl text-xs text-med-primary-900 text-left space-y-1">
-              <p><strong>Especialidad:</strong> {bookedInfo.specialty}</p>
-              <p><strong>Paciente DNI:</strong> {bookedInfo.dni}</p>
+              <p>
+                <strong>Especialidad:</strong> {bookedInfo.specialty}
+              </p>
+              <p>
+                <strong>Paciente DNI:</strong> {bookedInfo.dni}
+              </p>
             </div>
             <div className="mt-6 flex flex-col sm:flex-row gap-3">
-              <Button className="w-full text-xs py-2.5" onClick={() => navigate('/appointments')}>
+              <Button
+                className="w-full text-xs py-2.5"
+                onClick={() => navigate('/appointments')}
+              >
                 Ver Mis Turnos
               </Button>
               <Button

@@ -14,14 +14,29 @@ const STATUS_VARIANT = {
 
 function AppointmentsSearchPage() {
   const {
-    specialties, doctors,
-    dniFilter, setDniFilter,
-    specialtyFilter, setSpecialtyFilter,
-    doctorFilter, setDoctorFilter,
-    dateFilter, setDateFilter,
-    results, total, totalPages, pageIndex,
-    loading, loadingFilters, error, searched, activeFilters,
-    handleSearch, handleClear, formatDate, PAGE_SIZE,
+    specialties,
+    doctors,
+    dniFilter,
+    setDniFilter,
+    specialtyFilter,
+    setSpecialtyFilter,
+    doctorFilter,
+    setDoctorFilter,
+    dateFilter,
+    setDateFilter,
+    results,
+    total,
+    totalPages,
+    pageIndex,
+    loading,
+    loadingFilters,
+    error,
+    searched,
+    activeFilters,
+    handleSearch,
+    handleClear,
+    formatDate,
+    PAGE_SIZE,
   } = useAppointmentSearch();
 
   const columns = [
@@ -29,8 +44,12 @@ function AppointmentsSearchPage() {
       header: 'Fecha',
       render: (item) => (
         <div>
-          <p className="font-bold text-med-primary-900 text-sm">{formatDate(item.date)}</p>
-          <p className="text-xs text-med-text-muted mt-0.5">{item.startTime} - {item.endTime} hs</p>
+          <p className="font-bold text-med-primary-900 text-sm">
+            {formatDate(item.date)}
+          </p>
+          <p className="text-xs text-med-text-muted mt-0.5">
+            {item.startTime} - {item.endTime} hs
+          </p>
         </div>
       ),
     },
@@ -38,7 +57,9 @@ function AppointmentsSearchPage() {
       header: 'Especialidad / Doctor',
       render: (item) => (
         <div>
-          <p className="font-semibold text-med-primary-900">{item.doctor.specialty.name}</p>
+          <p className="font-semibold text-med-primary-900">
+            {item.doctor.specialty.name}
+          </p>
           <p className="text-xs text-med-text-muted">{item.doctor.name}</p>
         </div>
       ),
@@ -47,8 +68,12 @@ function AppointmentsSearchPage() {
       header: 'Paciente',
       render: (item) => (
         <div>
-          <p className="font-semibold text-med-text-main">{item.patient.fullName || '—'}</p>
-          <p className="text-xs text-med-text-muted mt-0.5">DNI: {item.patient.dni}</p>
+          <p className="font-semibold text-med-text-main">
+            {item.patient.fullName || '—'}
+          </p>
+          <p className="text-xs text-med-text-muted mt-0.5">
+            DNI: {item.patient.dni}
+          </p>
         </div>
       ),
     },
@@ -56,7 +81,9 @@ function AppointmentsSearchPage() {
       header: 'Estado',
       align: 'center',
       render: (item) => {
-        const status = STATUS_VARIANT[item.appointmentsStatus] || STATUS_VARIANT.Booked;
+        const status =
+          STATUS_VARIANT[item.appointmentsStatus] || STATUS_VARIANT.Booked;
+
         return <StatusBadge label={status.label} variant={status.variant} />;
       },
     },
@@ -70,15 +97,29 @@ function AppointmentsSearchPage() {
       />
       <Card className="p-6">
         <div className="flex items-center justify-between pb-4 border-b border-med-border-subtle">
-          <h2 className="text-base font-bold text-med-primary-900">Criterios de Búsqueda</h2>
+          <h2 className="text-base font-bold text-med-primary-900">
+            Criterios de Búsqueda
+          </h2>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 mt-4 items-end">
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-med-text-sub">DNI del Paciente</label>
+            <label className="text-xs font-semibold text-med-text-sub">
+              DNI del Paciente
+            </label>
             <div className="relative">
               <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-med-text-muted">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
                 </svg>
               </span>
               <input
@@ -92,7 +133,9 @@ function AppointmentsSearchPage() {
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-med-text-sub">Especialidad</label>
+            <label className="text-xs font-semibold text-med-text-sub">
+              Especialidad
+            </label>
             <select
               value={specialtyFilter}
               onChange={(e) => setSpecialtyFilter(e.target.value)}
@@ -101,12 +144,16 @@ function AppointmentsSearchPage() {
             >
               <option value="">Todas las Especialidades</option>
               {specialties.map((s) => (
-                <option key={s.id} value={s.id}>{s.name}</option>
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
               ))}
             </select>
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-med-text-sub">Doctor</label>
+            <label className="text-xs font-semibold text-med-text-sub">
+              Doctor
+            </label>
             <select
               value={doctorFilter}
               onChange={(e) => setDoctorFilter(e.target.value)}
@@ -115,12 +162,16 @@ function AppointmentsSearchPage() {
             >
               <option value="">Todos los Doctores</option>
               {doctors.map((d) => (
-                <option key={d.id} value={d.id}>{d.name}</option>
+                <option key={d.id} value={d.id}>
+                  {d.name}
+                </option>
               ))}
             </select>
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-med-text-sub">Fecha</label>
+            <label className="text-xs font-semibold text-med-text-sub">
+              Fecha
+            </label>
             <input
               type="date"
               value={dateFilter}
@@ -137,8 +188,18 @@ function AppointmentsSearchPage() {
               {loading ? (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
               ) : (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                  />
                 </svg>
               )}
               <span>{loading ? 'Buscando...' : 'Aplicar Filtros'}</span>

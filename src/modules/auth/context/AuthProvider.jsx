@@ -7,11 +7,13 @@ const AuthContext = createContext();
 function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     const token = localStorage.getItem('token');
+
     return Boolean(token);
   });
 
   const [role, setRole] = useState(() => {
     const role = localStorage.getItem('role');
+
     return role;
   });
 
@@ -34,8 +36,10 @@ function AuthProvider({ children }) {
     if (error) {
       return { error };
     }
+
     localStorage.setItem('adminEmail', email);
     setAuthSession(data);
+
     return { error: null };
   };
 
@@ -47,8 +51,9 @@ function AuthProvider({ children }) {
     }
 
     localStorage.setItem('patientDni', dni);
-    localStorage.setItem('patientEmail', email)
+    localStorage.setItem('patientEmail', email);
     setAuthSession(data);
+
     return { error: null };
   };
 

@@ -15,9 +15,10 @@ function PatientLayout() {
   };
 
   const getNavLinkClass = ({ isActive }) =>
-    `px-3.5 py-2 rounded-lg text-sm font-semibold transition ${isActive
-      ? 'bg-med-primary-900 text-white'
-      : 'text-med-text-sub hover:bg-med-primary-50 hover:text-med-primary-900'
+    `px-3.5 py-2 rounded-lg text-sm font-semibold transition ${
+      isActive
+        ? 'bg-med-primary-900 text-white'
+        : 'text-med-text-sub hover:bg-med-primary-50 hover:text-med-primary-900'
     }`;
 
   return (
@@ -62,7 +63,6 @@ function PatientLayout() {
           {/* Acciones Derecha Desktop / Mobile Avatar */}
           <div className="flex items-center gap-2 sm:gap-4">
             {/* Iconos sutiles como en el mock */}
-
 
             {/* Avatar Paciente */}
             <div className="flex items-center gap-2.5 pl-2 sm:border-l sm:border-med-border">
@@ -112,9 +112,10 @@ function PatientLayout() {
               end
               onClick={() => setMobileMenuOpen(false)}
               className={({ isActive }) =>
-                `block px-3 py-2 rounded-lg text-sm font-semibold transition ${isActive
-                  ? 'bg-med-primary-900 text-white'
-                  : 'text-med-text-sub hover:bg-med-primary-50'
+                `block px-3 py-2 rounded-lg text-sm font-semibold transition ${
+                  isActive
+                    ? 'bg-med-primary-900 text-white'
+                    : 'text-med-text-sub hover:bg-med-primary-50'
                 }`
               }
             >
@@ -124,9 +125,10 @@ function PatientLayout() {
               to="/appointments"
               onClick={() => setMobileMenuOpen(false)}
               className={({ isActive }) =>
-                `block px-3 py-2 rounded-lg text-sm font-semibold transition ${isActive
-                  ? 'bg-med-primary-900 text-white'
-                  : 'text-med-text-sub hover:bg-med-primary-50'
+                `block px-3 py-2 rounded-lg text-sm font-semibold transition ${
+                  isActive
+                    ? 'bg-med-primary-900 text-white'
+                    : 'text-med-text-sub hover:bg-med-primary-50'
                 }`
               }
             >

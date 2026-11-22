@@ -23,6 +23,7 @@ export default function useDoctors() {
     setError(null);
     try {
       const result = await getDoctors(PAGE_SIZE, pageIndex, searchTerm);
+
       setDoctors(result.data);
       setTotal(result.total);
     } catch (err) {
@@ -63,6 +64,7 @@ export default function useDoctors() {
     setTogglingId(doctorId);
     try {
       const updated = await toggleDoctorStatus(doctorId);
+
       setDoctors((prev) =>
         prev.map((doc) =>
           doc.id === doctorId ? { ...doc, isActive: updated.isActive } : doc

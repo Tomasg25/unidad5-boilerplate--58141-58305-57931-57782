@@ -8,9 +8,15 @@ import usePatientAppointments from '../hook/usePatientAppointments';
 function AppointmentsPage() {
   const navigate = useNavigate();
   const {
-    appointments, loading, error,
-    cancelTarget, setCancelTarget, cancelling,
-    handleCancel, formatDate, formatTime,
+    appointments,
+    loading,
+    error,
+    cancelTarget,
+    setCancelTarget,
+    cancelling,
+    handleCancel,
+    formatDate,
+    formatTime,
   } = usePatientAppointments();
 
   if (loading) {
@@ -36,13 +42,20 @@ function AppointmentsPage() {
       )}
       {appointments.length === 0 ? (
         <Card className="p-10 text-center">
-          <p className="text-med-text-muted text-sm">No tenés turnos reservados en este momento.</p>
-          <Button className="mt-4" onClick={() => navigate('/')}>Reservar un turno</Button>
+          <p className="text-med-text-muted text-sm">
+            No tenés turnos reservados en este momento.
+          </p>
+          <Button className="mt-4" onClick={() => navigate('/')}>
+            Reservar un turno
+          </Button>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {appointments.map((appt) => (
-            <Card key={appt.id} className="flex flex-col justify-between gap-4 p-6">
+            <Card
+              key={appt.id}
+              className="flex flex-col justify-between gap-4 p-6"
+            >
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-med-primary-100 text-med-primary-700">
@@ -53,19 +66,31 @@ function AppointmentsPage() {
                     Confirmado
                   </span>
                 </div>
-                <h3 className="text-lg font-bold text-med-primary-900">{appt.doctor}</h3>
+                <h3 className="text-lg font-bold text-med-primary-900">
+                  {appt.doctor}
+                </h3>
                 <p className="text-sm text-med-text-sub mt-2">
                   Fecha:{' '}
-                  <strong className="text-med-text-main font-semibold">{formatDate(appt.date)}</strong>{' '}
+                  <strong className="text-med-text-main font-semibold">
+                    {formatDate(appt.date)}
+                  </strong>{' '}
                   a las{' '}
-                  <strong className="text-med-text-main font-semibold">{formatTime(appt.startTime)} hs</strong>
+                  <strong className="text-med-text-main font-semibold">
+                    {formatTime(appt.startTime)} hs
+                  </strong>
                 </p>
                 {appt.reason && (
-                  <p className="text-xs text-med-text-muted mt-1">Motivo: {appt.reason}</p>
+                  <p className="text-xs text-med-text-muted mt-1">
+                    Motivo: {appt.reason}
+                  </p>
                 )}
               </div>
               <div className="flex gap-2 pt-3 border-t border-med-border">
-                <Button variant="outline" className="w-full text-xs" onClick={() => setCancelTarget(appt)}>
+                <Button
+                  variant="outline"
+                  className="w-full text-xs"
+                  onClick={() => setCancelTarget(appt)}
+                >
                   Cancelar Turno
                 </Button>
               </div>
@@ -84,10 +109,13 @@ function AppointmentsPage() {
         variant="danger"
       >
         ¿Estás seguro de que querés cancelar el turno con{' '}
-        <strong className="text-med-text-main">{cancelTarget?.doctor}</strong> del{' '}
+        <strong className="text-med-text-main">{cancelTarget?.doctor}</strong>{' '}
+        del{' '}
         <strong className="text-med-text-main">
-          {cancelTarget && formatDate(cancelTarget.date)} a las {cancelTarget && formatTime(cancelTarget.startTime)} hs
-        </strong>?
+          {cancelTarget && formatDate(cancelTarget.date)} a las{' '}
+          {cancelTarget && formatTime(cancelTarget.startTime)} hs
+        </strong>
+        ?
       </ConfirmModal>
     </div>
   );

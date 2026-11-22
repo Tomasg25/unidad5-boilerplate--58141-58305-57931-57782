@@ -7,33 +7,61 @@ import {
 } from '../../appointments/services/appointmentsService';
 
 const DAY_NAMES = [
-  'Domingo', 'Lunes', 'Martes', 'Miércoles',
-  'Jueves', 'Viernes', 'Sábado',
+  'Domingo',
+  'Lunes',
+  'Martes',
+  'Miércoles',
+  'Jueves',
+  'Viernes',
+  'Sábado',
 ];
 const SHORT_DAYS = ['DOM', 'LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB'];
 const MONTH_NAMES = [
-  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+  'Enero',
+  'Febrero',
+  'Marzo',
+  'Abril',
+  'Mayo',
+  'Junio',
+  'Julio',
+  'Agosto',
+  'Septiembre',
+  'Octubre',
+  'Noviembre',
+  'Diciembre',
 ];
 const SHORT_MONTHS = [
-  'ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN',
-  'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC',
+  'ENE',
+  'FEB',
+  'MAR',
+  'ABR',
+  'MAY',
+  'JUN',
+  'JUL',
+  'AGO',
+  'SEP',
+  'OCT',
+  'NOV',
+  'DIC',
 ];
 
 function toDateStr(d) {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
+
   return `${y}-${m}-${day}`;
 }
 
 function parseDate(dateStr) {
   const [year, month, day] = dateStr.split('-').map(Number);
+
   return new Date(year, month - 1, day);
 }
 
 function formatFullDate(dateStr) {
   const d = parseDate(dateStr);
+
   return `${DAY_NAMES[d.getDay()]} ${d.getDate()} de ${MONTH_NAMES[d.getMonth()]} de ${d.getFullYear()}`;
 }
 
@@ -45,18 +73,23 @@ function getMonday(date) {
   const d = new Date(date);
   const day = d.getDay();
   const diff = day === 0 ? -6 : 1 - day;
+
   d.setDate(d.getDate() + diff);
   d.setHours(0, 0, 0, 0);
+
   return d;
 }
 
 function getWeekDays(monday) {
   const days = [];
+
   for (let i = 0; i < 7; i++) {
     const d = new Date(monday);
+
     d.setDate(monday.getDate() + i);
     days.push(d);
   }
+
   return days;
 }
 
@@ -86,6 +119,7 @@ export default function useBooking() {
           getSpecialties(100, 1),
           getDoctors(100, 1),
         ]);
+
         setSpecialties((specRes.data || []).filter((s) => s.isActive));
         setAllDoctors((docRes.data || []).filter((d) => d.isActive));
       } catch {
@@ -94,6 +128,7 @@ export default function useBooking() {
         setLoading(false);
       }
     };
+
     loadData();
   }, []);
 
@@ -107,29 +142,33 @@ export default function useBooking() {
 
   const slotsByDate = slots.reduce((acc, slot) => {
     if (!acc[slot.date]) acc[slot.date] = [];
+
     acc[slot.date].push(slot);
+
     return acc;
   }, {});
 
   const today = new Date();
+
   today.setHours(0, 0, 0, 0);
   const currentMonday = getMonday(today);
   const displayMonday = new Date(currentMonday);
+
   displayMonday.setDate(displayMonday.getDate() + weekOffset * 7);
   const weekDays = getWeekDays(displayMonday);
 
   const weekLabel = (() => {
     const first = weekDays[0];
     const last = weekDays[6];
+
     if (first.getMonth() === last.getMonth()) {
       return `${first.getDate()} - ${last.getDate()} de ${MONTH_NAMES[first.getMonth()]}`;
     }
+
     return `${first.getDate()} ${SHORT_MONTHS[first.getMonth()]} - ${last.getDate()} ${SHORT_MONTHS[last.getMonth()]}`;
   })();
 
-  const currentDateSlots = selectedDate
-    ? slotsByDate[selectedDate] || []
-    : [];
+  const currentDateSlots = selectedDate ? slotsByDate[selectedDate] || [] : [];
 
   const resetSelection = () => {
     setSlots([]);
@@ -153,6 +192,7 @@ export default function useBooking() {
 
   const handleSearchSlots = async () => {
     if (!selectedDoctorId) return;
+
     setLoadingSlots(true);
     setError('');
     setSelectedSlot(null);
@@ -160,6 +200,7 @@ export default function useBooking() {
     setWeekOffset(0);
     try {
       const data = await getFreeSlots(selectedDoctorId);
+
       setSlots(data || []);
       setSlotsSearched(true);
     } catch {
@@ -171,15 +212,21 @@ export default function useBooking() {
 
   const handleConfirmAppointment = async () => {
     if (!selectedSlot) return;
+
     if (reason.trim().length < 5) {
       setError('El motivo de consulta debe tener al menos 5 caracteres.');
+
       return;
     }
+
     const dni = localStorage.getItem('patientDni');
+
     if (!dni) {
       setError('No se encontró su DNI. Por favor, vuelva a iniciar sesión.');
+
       return;
     }
+
     setBooking(true);
     setError('');
     try {
@@ -203,6 +250,7 @@ export default function useBooking() {
       const msg =
         err?.response?.data?.message ||
         'Error al reservar el turno. Intente nuevamente.';
+
       setError(msg);
     } finally {
       setBooking(false);

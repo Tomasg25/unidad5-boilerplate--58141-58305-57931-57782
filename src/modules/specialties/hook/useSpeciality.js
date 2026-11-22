@@ -23,6 +23,7 @@ export default function useSpecialties() {
     setError(null);
     try {
       const result = await getSpecialties(PAGE_SIZE, pageIndex, searchTerm);
+
       setSpecialties(result.data);
       setTotal(result.total);
     } catch (err) {
@@ -65,15 +66,14 @@ export default function useSpecialties() {
     setTogglingId(specId);
     try {
       const updated = await toggleSpecialtyStatus(specId);
+
       setSpecialties((prev) =>
         prev.map((spec) =>
           spec.id === specId ? { ...spec, isActive: updated.isActive } : spec
         )
       );
     } catch (err) {
-      setError(
-        err.response?.data?.message || 'Error al cambiar el estado'
-      );
+      setError(err.response?.data?.message || 'Error al cambiar el estado');
     } finally {
       setTogglingId(null);
     }
