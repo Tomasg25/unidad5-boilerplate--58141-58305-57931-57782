@@ -53,7 +53,7 @@ function ProtectedRoute({ children, redirectTo = '/login', role }) {
     return () => clearInterval(timer);
   }, [isWrongRole]);
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !authRole) {
     return <Navigate to={redirectTo} replace />;
   }
 
@@ -90,8 +90,8 @@ function ProtectedRoute({ children, redirectTo = '/login', role }) {
           </p>
           <p className="text-xs text-gray-400">
             Redirigiendo en{' '}
-            <span className="font-bold text-gray-700">{countdown}</span>{' '}
-            segundo{countdown !== 1 ? 's' : ''}...
+            <span className="font-bold text-gray-700">{countdown}</span> segundo
+            {countdown !== 1 ? 's' : ''}...
           </p>
         </div>
       </div>

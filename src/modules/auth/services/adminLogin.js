@@ -5,6 +5,6 @@ export const loginAdmin = async (email, password) => {
     email,
     password,
   });
- // console.log('Admin Login Response:', response.data); // Log the response for debugging
+
   return { data: response.data, error: null };
 };

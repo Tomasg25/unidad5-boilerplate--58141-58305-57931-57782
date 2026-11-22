@@ -21,6 +21,7 @@ function DoctorForm({ isOpen, onClose, onSubmit, doctor }) {
       try {
         // Traemos hasta 100 especialidades para el dropdown
         const result = await getSpecialties(100, 1);
+
         setSpecialties(result.data || []);
       } catch {
         setSpecialties([]);
@@ -38,27 +39,34 @@ function DoctorForm({ isOpen, onClose, onSubmit, doctor }) {
       setLicenseNumber('');
       setSpecialityId('');
     }
+
     setErrors({});
   }, [doctor, isOpen]);
 
   // Validaciones en el frontend que replican las del backend
   const validate = () => {
     const newErrors = {};
+
     if (!name || name.length < 3 || name.length > 100) {
       newErrors.name = 'El nombre debe tener entre 3 y 100 caracteres';
     }
+
     if (!licenseNumber || licenseNumber.trim() === '') {
       newErrors.licenseNumber = 'La matrícula es obligatoria';
     }
+
     if (!specialityId) {
       newErrors.specialityId = 'Debés seleccionar una especialidad';
     }
+
     setErrors(newErrors);
+
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!validate()) return;
 
     setLoading(true);
@@ -68,6 +76,7 @@ function DoctorForm({ isOpen, onClose, onSubmit, doctor }) {
     } catch (error) {
       const msg =
         error.response?.data?.message || 'Ocurrió un error al guardar';
+
       setErrors({ general: msg });
     } finally {
       setLoading(false);

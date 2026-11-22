@@ -11,9 +11,21 @@ import useDoctors from '../hook/useDoctors';
 
 function DoctorsPage() {
   const {
-    doctors, totalPages, pageIndex, setPageIndex, searchTerm,
-    loading, error, setError, togglingId, handleSearch,
-    handleCreate, handleUpdate, handleDelete, handleToggleStatus, PAGE_SIZE,
+    doctors,
+    totalPages,
+    pageIndex,
+    setPageIndex,
+    searchTerm,
+    loading,
+    error,
+    setError,
+    togglingId,
+    handleSearch,
+    handleCreate,
+    handleUpdate,
+    handleDelete,
+    handleToggleStatus,
+    PAGE_SIZE,
   } = useDoctors();
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -30,6 +42,7 @@ function DoctorsPage() {
 
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
+
     setDeleting(true);
     try {
       await handleDelete(deleteTarget.id);
@@ -47,17 +60,31 @@ function DoctorsPage() {
       render: (doc) => (
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-med-primary-100 flex items-center justify-center">
-            <svg className="w-5 h-5 text-med-primary-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.75" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            <svg
+              className="w-5 h-5 text-med-primary-700"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1.75"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              />
             </svg>
           </div>
-          <p className="font-semibold text-med-primary-900 leading-tight">{doc.name}</p>
+          <p className="font-semibold text-med-primary-900 leading-tight">
+            {doc.name}
+          </p>
         </div>
       ),
     },
     {
       header: 'Matrícula',
-      render: (doc) => <span className="text-med-text-sub">{doc.licenseNumber}</span>,
+      render: (doc) => (
+        <span className="text-med-text-sub">{doc.licenseNumber}</span>
+      ),
     },
     {
       header: 'Especialidad',
@@ -87,14 +114,42 @@ function DoctorsPage() {
             onChange={() => handleToggleStatus(doc.id)}
             disabled={togglingId === doc.id}
           />
-          <button title="Editar profesional" className="p-1.5 rounded-lg hover:bg-med-primary-50 text-med-primary-600 hover:text-med-primary-900 transition" onClick={() => handleOpenEdit(doc)}>
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          <button
+            title="Editar profesional"
+            className="p-1.5 rounded-lg hover:bg-med-primary-50 text-med-primary-600 hover:text-med-primary-900 transition"
+            onClick={() => handleOpenEdit(doc)}
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+              />
             </svg>
           </button>
-          <button title="Eliminar profesional" className="p-1.5 rounded-lg hover:bg-red-50 text-med-danger-text transition" onClick={() => setDeleteTarget(doc)}>
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          <button
+            title="Eliminar profesional"
+            className="p-1.5 rounded-lg hover:bg-red-50 text-med-danger-text transition"
+            onClick={() => setDeleteTarget(doc)}
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              />
             </svg>
           </button>
         </div>
@@ -104,35 +159,119 @@ function DoctorsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="Directorio de Doctores" subtitle="Gestione el personal médico y supervise su disponibilidad actual.">
+      <PageHeader
+        title="Directorio de Doctores"
+        subtitle="Gestione el personal médico y supervise su disponibilidad actual."
+      >
         <div className="relative min-w-[240px] flex-1 sm:flex-initial">
           <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-med-text-muted">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
             </svg>
           </span>
-          <input type="text" placeholder="Buscar doctor (mín. 3 letras)..." value={searchTerm} onChange={(e) => handleSearch(e.target.value)} className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-med-border rounded-lg text-med-text-main placeholder-med-text-muted focus:outline-none focus:ring-1 focus:ring-med-primary-600" />
+          <input
+            type="text"
+            placeholder="Buscar doctor (mín. 3 letras)..."
+            value={searchTerm}
+            onChange={(e) => handleSearch(e.target.value)}
+            className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-med-border rounded-lg text-med-text-main placeholder-med-text-muted focus:outline-none focus:ring-1 focus:ring-med-primary-600"
+          />
         </div>
-        <Button onClick={() => { setAvailabilityDoctorId(null); setAvailabilityOpen(true); }} className="flex items-center gap-2">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <Button
+          onClick={() => {
+            setAvailabilityDoctorId(null);
+            setAvailabilityOpen(true);
+          }}
+          className="flex items-center gap-2"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
           <span>Gestionar Disponibilidad</span>
         </Button>
-        <Button onClick={() => { setEditingDoctor(null); setModalOpen(true); }} className="flex items-center gap-1.5">
+        <Button
+          onClick={() => {
+            setEditingDoctor(null);
+            setModalOpen(true);
+          }}
+          className="flex items-center gap-1.5"
+        >
           <span>+</span>
           <span>Nuevo Doctor</span>
         </Button>
       </PageHeader>
       {error && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700">{error}</div>
+        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700">
+          {error}
+        </div>
       )}
-      <DataTable title="Registros de Doctores" columns={columns} data={doctors} loading={loading} loadingText="Cargando doctores..." emptyText="No se encontraron doctores." rowKey={(doc) => doc.id} currentPage={pageIndex} totalPages={totalPages} totalItems={doctors.length} pageSize={PAGE_SIZE} onPageChange={(page) => setPageIndex(page)} />
-      <DoctorForm isOpen={modalOpen} onClose={() => { setModalOpen(false); setEditingDoctor(null); }} onSubmit={editingDoctor ? (data) => handleUpdate(editingDoctor.id, data) : handleCreate} doctor={editingDoctor} />
-      <ConfirmModal isOpen={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleConfirmDelete} title="Eliminar Doctor" confirmText="Sí, Eliminar" loading={deleting} variant="danger">
-        ¿Estás seguro de que querés eliminar a <strong>{deleteTarget?.name}</strong>? Esta acción no se puede deshacer.
+      <DataTable
+        title="Registros de Doctores"
+        columns={columns}
+        data={doctors}
+        loading={loading}
+        loadingText="Cargando doctores..."
+        emptyText="No se encontraron doctores."
+        rowKey={(doc) => doc.id}
+        currentPage={pageIndex}
+        totalPages={totalPages}
+        totalItems={doctors.length}
+        pageSize={PAGE_SIZE}
+        onPageChange={(page) => setPageIndex(page)}
+      />
+      <DoctorForm
+        isOpen={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          setEditingDoctor(null);
+        }}
+        onSubmit={
+          editingDoctor
+            ? (data) => handleUpdate(editingDoctor.id, data)
+            : handleCreate
+        }
+        doctor={editingDoctor}
+      />
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleConfirmDelete}
+        title="Eliminar Doctor"
+        confirmText="Sí, Eliminar"
+        loading={deleting}
+        variant="danger"
+      >
+        ¿Estás seguro de que querés eliminar a{' '}
+        <strong>{deleteTarget?.name}</strong>? Esta acción no se puede deshacer.
       </ConfirmModal>
-      <AvailabilityModal isOpen={availabilityOpen} onClose={() => { setAvailabilityOpen(false); setAvailabilityDoctorId(null); }} preselectedDoctorId={availabilityDoctorId} />
+      <AvailabilityModal
+        isOpen={availabilityOpen}
+        onClose={() => {
+          setAvailabilityOpen(false);
+          setAvailabilityDoctorId(null);
+        }}
+        preselectedDoctorId={availabilityDoctorId}
+      />
     </div>
   );
 }

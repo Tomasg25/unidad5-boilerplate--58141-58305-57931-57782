@@ -5,17 +5,33 @@ import {
 } from '../../appointments/services/appointmentsService';
 
 const DAY_NAMES = [
-  'Domingo', 'Lunes', 'Martes', 'Miércoles',
-  'Jueves', 'Viernes', 'Sábado',
+  'Domingo',
+  'Lunes',
+  'Martes',
+  'Miércoles',
+  'Jueves',
+  'Viernes',
+  'Sábado',
 ];
 const MONTH_NAMES = [
-  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+  'Enero',
+  'Febrero',
+  'Marzo',
+  'Abril',
+  'Mayo',
+  'Junio',
+  'Julio',
+  'Agosto',
+  'Septiembre',
+  'Octubre',
+  'Noviembre',
+  'Diciembre',
 ];
 
 function formatDate(dateStr) {
   const [year, month, day] = dateStr.split('-').map(Number);
   const d = new Date(year, month - 1, day);
+
   return `${DAY_NAMES[d.getDay()]} ${day} de ${MONTH_NAMES[month - 1]} de ${year}`;
 }
 
@@ -33,13 +49,17 @@ export default function usePatientAppointments() {
   useEffect(() => {
     const loadAppointments = async () => {
       const dni = localStorage.getItem('patientDni');
+
       if (!dni) {
         setError('No se encontró su DNI. Por favor, vuelva a iniciar sesión.');
         setLoading(false);
+
         return;
       }
+
       try {
         const data = await getPatientAppointments(dni);
+
         setAppointments(data || []);
       } catch {
         setError('Error al cargar los turnos. Intente nuevamente.');
@@ -47,11 +67,13 @@ export default function usePatientAppointments() {
         setLoading(false);
       }
     };
+
     loadAppointments();
   }, []);
 
   const handleCancel = async () => {
     if (!cancelTarget) return;
+
     setCancelling(true);
     try {
       await cancelAppointment(cancelTarget.id);
@@ -61,6 +83,7 @@ export default function usePatientAppointments() {
       const msg =
         err?.response?.data?.message ||
         'Error al cancelar el turno. Intente nuevamente.';
+
       setError(msg);
       setCancelTarget(null);
     } finally {

@@ -5,6 +5,7 @@ const ALIGN_CLASS = {
   center: 'text-center',
   right: 'text-right',
 };
+
 function DataTable({
   title,
   columns,

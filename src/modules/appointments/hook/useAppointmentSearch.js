@@ -4,17 +4,33 @@ import { getDoctors } from '../../doctors/services/doctorsService';
 import { searchAppointments } from '../services/appointmentsService';
 
 const DAY_NAMES = [
-  'Domingo', 'Lunes', 'Martes', 'Miércoles',
-  'Jueves', 'Viernes', 'Sábado',
+  'Domingo',
+  'Lunes',
+  'Martes',
+  'Miércoles',
+  'Jueves',
+  'Viernes',
+  'Sábado',
 ];
 const MONTH_NAMES = [
-  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+  'Enero',
+  'Febrero',
+  'Marzo',
+  'Abril',
+  'Mayo',
+  'Junio',
+  'Julio',
+  'Agosto',
+  'Septiembre',
+  'Octubre',
+  'Noviembre',
+  'Diciembre',
 ];
 
 function formatDate(dateStr) {
   const [year, month, day] = dateStr.split('-').map(Number);
   const d = new Date(year, month - 1, day);
+
   return `${DAY_NAMES[d.getDay()]} ${day} de ${MONTH_NAMES[month - 1]}`;
 }
 
@@ -42,6 +58,7 @@ export default function useAppointmentSearch() {
           getSpecialties(100, 1),
           getDoctors(100, 1),
         ]);
+
         setSpecialties(specRes.data || []);
         setDoctors(docRes.data || []);
       } catch {
@@ -50,6 +67,7 @@ export default function useAppointmentSearch() {
         setLoadingFilters(false);
       }
     };
+
     loadFilters();
   }, []);
 
@@ -59,11 +77,17 @@ export default function useAppointmentSearch() {
     setPageIndex(page);
     try {
       const filters = {};
+
       if (dniFilter.trim()) filters.dni = dniFilter.trim();
+
       if (specialtyFilter) filters.specialtyId = specialtyFilter;
+
       if (doctorFilter) filters.doctorId = doctorFilter;
+
       if (dateFilter) filters.date = dateFilter;
+
       const data = await searchAppointments(filters, PAGE_SIZE, page);
+
       setResults(data.data || []);
       setTotal(data.total || 0);
       setSearched(true);
@@ -88,15 +112,21 @@ export default function useAppointmentSearch() {
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   const activeFilters = [];
+
   if (dniFilter.trim()) activeFilters.push(`DNI: ${dniFilter.trim()}`);
+
   if (specialtyFilter) {
     const spec = specialties.find((s) => s.id === specialtyFilter);
+
     if (spec) activeFilters.push(`Especialidad: ${spec.name}`);
   }
+
   if (doctorFilter) {
     const doc = doctors.find((d) => d.id === doctorFilter);
+
     if (doc) activeFilters.push(`Doctor: ${doc.name}`);
   }
+
   if (dateFilter) activeFilters.push(`Fecha: ${dateFilter}`);
 
   return {

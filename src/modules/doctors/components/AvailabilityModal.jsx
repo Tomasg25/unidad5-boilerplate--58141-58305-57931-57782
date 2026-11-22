@@ -16,8 +16,8 @@ const DAYS_OPTIONS = [
   'DOMINGO',
 ];
 const EMPTY_ROW = { day: '', startTime: '', endTime: '' };
-function AvailabilityModal({ isOpen, onClose, preselectedDoctorId }) {
 
+function AvailabilityModal({ isOpen, onClose, preselectedDoctorId }) {
   const [doctors, setDoctors] = useState([]);
   const [selectedDoctorId, setSelectedDoctorId] = useState('');
   const [rows, setRows] = useState([{ ...EMPTY_ROW }]);
@@ -30,17 +30,21 @@ function AvailabilityModal({ isOpen, onClose, preselectedDoctorId }) {
   // Al abrir: cargar lista de doctores para el dropdown
   useEffect(() => {
     if (!isOpen) return;
+
     setError(null);
     setSuccess(null);
     const fetchDoctors = async () => {
       try {
         const result = await getDoctors(100, 1);
+
         setDoctors(result.data || []);
       } catch {
         setDoctors([]);
       }
     };
+
     fetchDoctors();
+
     if (preselectedDoctorId) {
       setSelectedDoctorId(preselectedDoctorId);
     } else {
@@ -53,11 +57,13 @@ function AvailabilityModal({ isOpen, onClose, preselectedDoctorId }) {
   // Cuando cambia el doctor seleccionado: cargar su disponibilidad actual
   useEffect(() => {
     if (!selectedDoctorId || !isOpen) return;
+
     const fetchAvailability = async () => {
       setLoadingData(true);
       setError(null);
       try {
         const data = await getAvailabilities(selectedDoctorId);
+
         if (data && data.length > 0) {
           // El doctor ya tiene horarios configurados: los mostramos para editar
           setRows(
@@ -80,9 +86,10 @@ function AvailabilityModal({ isOpen, onClose, preselectedDoctorId }) {
         setLoadingData(false);
       }
     };
+
     fetchAvailability();
   }, [selectedDoctorId, isOpen]);
-  
+
   // Agregar una fila nueva al formulario
   const addRow = () => {
     setRows([...rows, { ...EMPTY_ROW }]);
@@ -90,6 +97,7 @@ function AvailabilityModal({ isOpen, onClose, preselectedDoctorId }) {
   // Quitar una fila
   const removeRow = (index) => {
     if (rows.length <= 1) return;
+
     setRows(rows.filter((_, i) => i !== index));
   };
   // Actualizar un campo de una fila específica
@@ -97,30 +105,40 @@ function AvailabilityModal({ isOpen, onClose, preselectedDoctorId }) {
     const updated = rows.map((row, i) =>
       i === index ? { ...row, [field]: value } : row
     );
+
     setRows(updated);
   };
   // Validar antes de enviar
   const validate = () => {
     for (const row of rows) {
       if (!row.day) return 'Todos los días deben estar seleccionados';
-      if (!row.startTime) return 'Todos los horarios de inicio son obligatorios';
+
+      if (!row.startTime)
+        return 'Todos los horarios de inicio son obligatorios';
+
       if (!row.endTime) return 'Todos los horarios de fin son obligatorios';
+
       if (row.startTime >= row.endTime)
         return `El horario de inicio debe ser menor al de fin (${row.day})`;
     }
     // Verificar días duplicados
     const days = rows.map((r) => r.day);
+
     if (new Set(days).size !== days.length) {
       return 'No se puede repetir el mismo día';
     }
+
     return null;
   };
   const handleSubmit = async () => {
     const validationError = validate();
+
     if (validationError) {
       setError(validationError);
+
       return;
     }
+
     setLoading(true);
     setError(null);
     setSuccess(null);
@@ -130,6 +148,7 @@ function AvailabilityModal({ isOpen, onClose, preselectedDoctorId }) {
         startTime: r.startTime,
         endTime: r.endTime,
       }));
+
       if (hasExisting) {
         // Si ya tenía disponibilidad: PUT (reemplazar)
         await updateAvailability(selectedDoctorId, days);
@@ -137,6 +156,7 @@ function AvailabilityModal({ isOpen, onClose, preselectedDoctorId }) {
         // Si no tenía: POST (crear)
         await createAvailability(selectedDoctorId, days);
       }
+
       setSuccess('Disponibilidad guardada correctamente');
       setHasExisting(true);
     } catch (err) {
@@ -147,7 +167,9 @@ function AvailabilityModal({ isOpen, onClose, preselectedDoctorId }) {
       setLoading(false);
     }
   };
+
   if (!isOpen) return null;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
@@ -323,4 +345,3 @@ function AvailabilityModal({ isOpen, onClose, preselectedDoctorId }) {
   );
 }
 export default AvailabilityModal;
- 

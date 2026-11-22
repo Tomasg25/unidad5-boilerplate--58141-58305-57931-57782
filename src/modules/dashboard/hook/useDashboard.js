@@ -26,6 +26,7 @@ export default function useDashboard() {
         ]);
         const allDoctors = docRes.data || [];
         const allSpecialties = specRes.data || [];
+
         setDoctors(allDoctors);
         setTotalDoctors(allDoctors.length);
         setActiveDoctorsCount(allDoctors.filter((d) => d.isActive).length);
@@ -39,6 +40,7 @@ export default function useDashboard() {
         setLoading(false);
       }
     };
+
     loadDashboard();
   }, []);
 
