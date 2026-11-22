@@ -12,7 +12,7 @@ instance.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    console.log('Request Config:', config); 
+    //console.log('Request Config:', config); 
     return config;
   },
   (error) => Promise.reject(error)

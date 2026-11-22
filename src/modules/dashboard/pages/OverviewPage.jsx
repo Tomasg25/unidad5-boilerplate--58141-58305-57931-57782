@@ -8,6 +8,7 @@ import PageHeader from '../../shared/components/PageHeader';
 import { getDoctors } from '../../doctors/services/doctorsService';
 import { getSpecialties } from '../../specialties/services/specialtiesService';
 import { searchAppointments } from '../../appointments/services/appointmentsService';
+
 function OverviewPage() {
   const navigate = useNavigate();
   const [doctors, setDoctors] = useState([]);
@@ -19,6 +20,7 @@ function OverviewPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const PAGE_SIZE = 5;
+
   useEffect(() => {
     const loadDashboard = async () => {
       try {
@@ -28,6 +30,7 @@ function OverviewPage() {
           getSpecialties(100, 1),
           searchAppointments({ date: today }, 1, 1),
         ]);
+
         const allDoctors = docRes.data || [];
         const allSpecialties = specRes.data || [];
         setDoctors(allDoctors);
@@ -35,14 +38,17 @@ function OverviewPage() {
         setActiveDoctorsCount(allDoctors.filter((d) => d.isActive).length);
         setActiveSpecialtiesCount(allSpecialties.filter((s) => s.isActive).length);
         setTodayAppointmentsCount(apptRes.total || 0);
+
       } catch {
         setError('Error al cargar el dashboard.');
+
       } finally {
         setLoading(false);
       }
     };
     loadDashboard();
   }, []);
+  
   const totalDoctorPages = Math.ceil(totalDoctors / PAGE_SIZE);
   const pagedDoctors = doctors.slice(
     (doctorPage - 1) * PAGE_SIZE,

@@ -34,7 +34,7 @@ function AuthProvider({ children }) {
     if (error) {
       return { error };
     }
-
+    localStorage.setItem('adminEmail', email);
     setAuthSession(data);
     return { error: null };
   };
