@@ -71,6 +71,7 @@ function AvailabilityModal({ isOpen, onClose, preselectedDoctorId }) {
               day: item.day,
               startTime: item.startTime,
               endTime: item.endTime,
+              hasBookings: item.hasBookings || false,
             }))
           );
           setHasExisting(true);
@@ -97,7 +98,10 @@ function AvailabilityModal({ isOpen, onClose, preselectedDoctorId }) {
   // Quitar una fila
   const removeRow = (index) => {
     if (rows.length <= 1) return;
-
+    if (rows[index].hasBookings) {
+      setError('No se puede eliminar una disponibilidad con turnos asignados');
+      return;
+    }
     setRows(rows.filter((_, i) => i !== index));
   };
   // Actualizar un campo de una fila específica
@@ -121,11 +125,22 @@ function AvailabilityModal({ isOpen, onClose, preselectedDoctorId }) {
       if (row.startTime >= row.endTime)
         return `El horario de inicio debe ser menor al de fin (${row.day})`;
     }
-    // Verificar días duplicados
-    const days = rows.map((r) => r.day);
-
-    if (new Set(days).size !== days.length) {
-      return 'No se puede repetir el mismo día';
+    const dayGroups = {};
+    for (const row of rows) {
+      if (!dayGroups[row.day]) dayGroups[row.day] = [];
+      dayGroups[row.day].push(row);
+    }
+    for (const [day, group] of Object.entries(dayGroups)) {
+      for (let i = 0; i < group.length; i++) {
+        for (let j = i + 1; j < group.length; j++) {
+          if (
+            group[i].startTime < group[j].endTime &&
+            group[j].startTime < group[i].endTime
+          ) {
+            return `Los horarios del ${day} se superponen`;
+          }
+        }
+      }
     }
 
     return null;
